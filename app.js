@@ -1,3 +1,8 @@
+
+if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined') {
+  window.CONTENT_FULL = CONTENT;
+}
+
 (function () {
   'use strict';
 
@@ -7,6 +12,8 @@
   var DEFAULT_LANG = 'plaintext';
   var GUIDE_TITLE  = 'Tech Primer';
   var GUIDE_ICON   = '\uD83D\uDCDA';
+  var SITE_ORIGIN  = 'https://tech-primer.ronitmehta817.workers.dev/' 
+  var SITE_DESCRIPTION = 'A complete software engineering learning guide for system design, microservices, message queues, and Spring Framework.';
 
   var DOMAINS = [
     { prefix: 'sd-',     label: 'System Design',    icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd' },
@@ -71,6 +78,94 @@
 
   function chKey(sid, cid) { return sid + '/' + cid; }
 
+  function getChapterUrl(sectionId, chapterId) {
+    var url = new URL(window.location);
+    url.hash = '';
+    url.search = '';
+    url.searchParams.set('section', sectionId);
+    url.searchParams.set('chapter', chapterId);
+    return url;
+  }
+
+  function getCanonicalUrl(sectionId, chapterId) {
+    var url = new URL('/', SITE_ORIGIN);
+    if (sectionId && chapterId) {
+      url.searchParams.set('section', sectionId);
+      url.searchParams.set('chapter', chapterId);
+    }
+    return url.toString();
+  }
+
+  function setHeadMeta(selector, attrName, attrValue, content) {
+    var el = document.head.querySelector(selector);
+    if (!el) {
+      el = document.createElement('meta');
+      el.setAttribute(attrName, attrValue);
+      document.head.appendChild(el);
+    }
+    el.setAttribute('content', content);
+  }
+
+  function setCanonical(url) {
+    var el = document.head.querySelector('link[rel="canonical"]');
+    if (!el) {
+      el = document.createElement('link');
+      el.setAttribute('rel', 'canonical');
+      document.head.appendChild(el);
+    }
+    el.setAttribute('href', url);
+  }
+
+  function updateDocumentMeta(section, chapter) {
+    var title = GUIDE_TITLE + ' \u2014 Complete Guide';
+    var description = SITE_DESCRIPTION;
+    var canonical = getCanonicalUrl();
+    if (section && chapter) {
+      var domain = getDomain(section.id);
+      var scope = domain ? domain.label : section.title;
+      title = chapter.title + ' \u2014 ' + scope + ' | ' + GUIDE_TITLE;
+      description = 'Learn ' + chapter.title + ' in the ' + scope + ' section of Tech Primer.';
+      canonical = getCanonicalUrl(section.id, chapter.id);
+    }
+    document.title = title;
+    setHeadMeta('meta[name="description"]', 'name', 'description', description);
+    setHeadMeta('meta[property="og:title"]', 'property', 'og:title', title);
+    setHeadMeta('meta[property="og:description"]', 'property', 'og:description', description);
+    setHeadMeta('meta[property="og:url"]', 'property', 'og:url', canonical);
+    setHeadMeta('meta[name="twitter:title"]', 'name', 'twitter:title', title);
+    setHeadMeta('meta[name="twitter:description"]', 'name', 'twitter:description', description);
+    setCanonical(canonical);
+  }
+
+  // ===================== CHAPTER ID NORMALISATION =====================
+  // Chapter IDs in CONTENT historically duplicated their section's prefix
+  // ("sd-foundations" section + "sd-01-..." chapter -> redundant "sd-",
+  //  "mq-foundations" section + "mq-foundations-..." chapter -> redundant
+  //  "mq-foundations-").  We trim the longest matching prefix once at load
+  // time so chapter IDs are short (and identical to the URL form) everywhere
+  // downstream - URL routing, search index, lookups, and localStorage keys.
+  // The mutation happens at every CONTENT entry point so by the time any
+  // other code touches a chapter, the .id is already canonical.
+  function normaliseChapterId(sectionId, chapterId) {
+    if (!sectionId || !chapterId) return chapterId;
+    var fullPrefix = sectionId + '-';
+    if (chapterId.indexOf(fullPrefix) === 0) return chapterId.slice(fullPrefix.length);
+    var domain = getDomain(sectionId);
+    if (domain && chapterId.indexOf(domain.prefix) === 0) return chapterId.slice(domain.prefix.length);
+    return chapterId;
+  }
+
+  function normaliseSectionIds(sections) {
+    if (!Array.isArray(sections)) return sections;
+    sections.forEach(function(sec) {
+      if (!sec || !Array.isArray(sec.chapters)) return;
+      sec.chapters.forEach(function(ch) {
+        if (ch && typeof ch.id === 'string') ch.id = normaliseChapterId(sec.id, ch.id);
+      });
+    });
+    return sections;
+  }
+
   // ===================== STORAGE =====================
   var Store = {
     _g: function(k, d) { try { var v = localStorage.getItem(STORAGE_PFX + k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
@@ -78,10 +173,6 @@
 
     getLastRead:    function()      { return this._g('last-read', null); },
     setLastRead:    function(sid,cid){ this._s('last-read', { s: sid, c: cid, t: Date.now() }); },
-
-    getCompleted:   function()      { return this._g('completed', {}); },
-    toggleComplete: function(key)   { var c = this.getCompleted(); if(c[key]) delete c[key]; else c[key] = Date.now(); this._s('completed', c); return !!c[key]; },
-    isComplete:     function(key)   { return !!this.getCompleted()[key]; },
 
     getBookmarks:   function()      { return this._g('bookmarks', {}); },
     toggleBookmark: function(key, title, sid) { var b = this.getBookmarks(); if(b[key]) delete b[key]; else b[key] = { title: title, sid: sid, t: Date.now() }; this._s('bookmarks', b); return !!b[key]; },
@@ -141,7 +232,7 @@
     };
     script.onerror = function() {
       if (!state.contentLoaded && window.CONTENT_FALLBACK) {
-        CONTENT = window.CONTENT_FALLBACK;
+        CONTENT = normaliseSectionIds(window.CONTENT_FALLBACK);
         state.contentLoaded = true;
         DOMAINS.forEach(function(d){ state.loadedDomains[d.prefix] = true; });
       }
@@ -151,6 +242,7 @@
   }
 
   function mergeDomainContent(sections, prefix) {
+    normaliseSectionIds(sections);
     sections.forEach(function(sec) {
       var exists = CONTENT.find(function(s){ return s.id === sec.id; });
       if (!exists) CONTENT.push(sec);
@@ -178,17 +270,17 @@
 
   function initContentFromManifest() {
     if (window.CONTENT_FULL && Array.isArray(window.CONTENT_FULL)) {
-      CONTENT = window.CONTENT_FULL;
+      CONTENT = normaliseSectionIds(window.CONTENT_FULL);
       state.contentLoaded = true;
       DOMAINS.forEach(function(d){ state.loadedDomains[d.prefix] = true; });
       return;
     }
     if (window.CONTENT_MANIFEST) {
-      CONTENT = window.CONTENT_MANIFEST.map(function(s) {
+      CONTENT = normaliseSectionIds(window.CONTENT_MANIFEST.map(function(s) {
         return { id: s.id, title: s.title, icon: s.icon, description: s.description || '', chapters: s.chapters.map(function(ch) {
           return { id: ch.id, title: ch.title, parent: ch.parent || undefined, content: '' };
         })};
-      });
+      }));
     }
   }
 
@@ -239,11 +331,14 @@
     if (state.mermaidReady) {
       try { mermaid.initialize({ theme: theme === 'dark' ? 'dark' : 'default', startOnLoad: false }); } catch(e){}
     }
+    if (window.AetherBg && window.AetherBg.setTheme) window.AetherBg.setTheme(theme);
+    if (window.AetherWelcome && window.AetherWelcome.setTheme) window.AetherWelcome.setTheme(theme);
   }
 
   function toggleTheme() {
     var cur = document.documentElement.getAttribute('data-theme');
-    applyTheme(cur === 'dark' ? 'light' : 'dark');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
     if (state.activeChapter) reRenderMermaid();
     if (parallaxState) initParallaxShapes();
   }
@@ -325,22 +420,16 @@
     dom.sidebarNav.innerHTML = '';
     state.flatChapters = [];
     var filtered = getFilteredContent();
-    var completed = Store.getCompleted();
     var bookmarks = Store.getBookmarks();
 
     filtered.forEach(function (section) {
       var domain = getDomain(section.id);
-      var totalCh = section.chapters.length;
-      var doneCh = section.chapters.filter(function(ch){ return completed[chKey(section.id, ch.id)]; }).length;
-      var pct = totalCh ? Math.round((doneCh / totalCh) * 100) : 0;
 
-      var progressHtml = '<div class="nav-section-progress"><div class="nav-section-progress-bar" style="width:' + pct + '%"></div></div>';
       var headerEl = h('div', { class: 'sidebar-section-header', html:
         '<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' + ICONS.chevron + '</svg>' +
         '<span class="section-icon">' + section.icon + '</span>' +
         '<span>' + section.title + '</span>' +
-        (domain ? '<span style="font-size:11px;opacity:0.6;margin-left:auto;text-transform:none;letter-spacing:0;">' + domain.label + '</span>' : '') +
-        '<span class="nav-section-pct">' + doneCh + '/' + totalCh + '</span>' + progressHtml
+        (domain ? '<span style="font-size:11px;opacity:0.6;margin-left:auto;text-transform:none;letter-spacing:0;">' + domain.label + '</span>' : '')
       });
       var itemsContainer = h('div', { class: 'sidebar-section-items' });
 
@@ -352,14 +441,13 @@
         }
         state.flatChapters.push({ sectionId: section.id, chapter: ch });
         var key = chKey(section.id, ch.id);
-        var isComplete = !!completed[key];
         var isBookmarked = !!bookmarks[key];
         var navItem = h('div', {
-          class: 'nav-item' + (isComplete ? ' completed' : ''),
+          class: 'nav-item',
           data: { section: section.id, chapter: ch.id },
           on: { click: function () { loadChapter(section.id, ch.id); closeSidebar(); } }
         }, [
-          h('span', { class: 'nav-item-dot' + (isComplete ? ' done' : '') }),
+          h('span', { class: 'nav-item-dot' }),
           h('span', { class: 'nav-item-title', text: ch.title }),
           isBookmarked ? h('span', { class: 'nav-item-star', html: svg('starFill', 12) }) : null,
           h('span', { class: 'nav-item-time', text: ch.content ? readingTime(ch.content) : '' })
@@ -383,20 +471,6 @@
       });
       dom.sidebarNav.appendChild(h('div', { class: 'sidebar-section' }, [headerEl, itemsContainer]));
     });
-
-    updateProgressSummary();
-  }
-
-  function updateProgressSummary() {
-    if (!dom.progressSummary) return;
-    var completed = Store.getCompleted();
-    var total = 0, done = 0;
-    CONTENT.forEach(function(s){ s.chapters.forEach(function(){ total++; }); });
-    for (var k in completed) { if (completed[k]) done++; }
-    var pct = total ? Math.round((done / total) * 100) : 0;
-    dom.progressSummary.innerHTML =
-      '<div class="progress-summary-text">' + done + ' / ' + total + ' chapters completed (' + pct + '%)</div>' +
-      '<div class="progress-summary-bar"><div class="progress-summary-fill" style="width:' + pct + '%"></div></div>';
   }
 
   function setActiveNav(sectionId, chapterId) {
@@ -876,11 +950,14 @@
           setTimeout(function () { copyBtn.classList.remove('copied'); copyBtn.innerHTML = svg('copy') + ' Copy'; }, 2000);
         });
       });
-      var header = h('div', { class: 'code-header' }, [h('span', { text: display }), copyBtn]);
+      var toolbar = h('div', { class: 'code-copy-toolbar' }, [
+        h('span', { class: 'code-language-label', text: display }),
+        copyBtn
+      ]);
       var wrapper = h('div', { class: 'code-block-wrapper', style: { position: 'relative' } });
       pre.parentNode.insertBefore(wrapper, pre);
-      wrapper.appendChild(header);
       wrapper.appendChild(pre);
+      wrapper.appendChild(toolbar);
     });
   }
 
@@ -888,18 +965,6 @@
   function renderChapterActions(sectionId, chapterId) {
     var key = chKey(sectionId, chapterId);
     var toolbar = h('div', { class: 'chapter-actions' });
-
-    var completedBtn = h('button', {
-      class: 'action-btn' + (Store.isComplete(key) ? ' active' : ''),
-      html: svg('check', 16) + (Store.isComplete(key) ? ' Completed' : ' Mark Complete'),
-      on: { click: function() {
-        Store.toggleComplete(key);
-        completedBtn.classList.toggle('active');
-        completedBtn.innerHTML = svg('check', 16) + (Store.isComplete(key) ? ' Completed' : ' Mark Complete');
-        buildNavigation();
-        setActiveNav(sectionId, chapterId);
-      }}
-    });
 
     var bookmarkBtn = h('button', {
       class: 'action-btn bookmark-btn' + (Store.isBookmarked(key) ? ' active' : ''),
@@ -927,7 +992,6 @@
       on: { click: function() { toggleNotesPanel(sectionId, chapterId); } }
     });
 
-    toolbar.appendChild(completedBtn);
     toolbar.appendChild(bookmarkBtn);
     toolbar.appendChild(playlistBtn);
     toolbar.appendChild(notesBtn);
@@ -1111,13 +1175,14 @@
   }
 
   // ===================== LOAD CHAPTER =====================
-  function loadChapter(sectionId, chapterId) {
+  function loadChapter(sectionId, chapterId, opts) {
+    opts = opts || {};
     var domain = getDomain(sectionId);
     if (domain && !state.loadedDomains[domain.prefix]) {
-      loadDomainContent(domain.prefix, function() { doLoadChapter(sectionId, chapterId); });
+      loadDomainContent(domain.prefix, function() { doLoadChapter(sectionId, chapterId, opts); });
       return;
     }
-    doLoadChapter(sectionId, chapterId);
+    doLoadChapter(sectionId, chapterId, opts);
   }
 
   function resolveChapterContent(chapter) {
@@ -1382,7 +1447,8 @@
     return lines.slice(next).join('\n');
   }
 
-  function doLoadChapter(sectionId, chapterId) {
+  function doLoadChapter(sectionId, chapterId, opts) {
+    opts = opts || {};
     var section = CONTENT.find(function (s) { return s.id === sectionId; });
     if (!section) return;
     var chapter = section.chapters.find(function (c) { return c.id === chapterId; });
@@ -1401,13 +1467,13 @@
             if (state.activeSection === sectionId && state.activeChapter === chapterId) {
               renderChapterError(err, function () {
                 if (chapter.contentFile) delete markdownFileCache[chapter.contentFile];
-                doLoadChapter(sectionId, chapterId);
+                doLoadChapter(sectionId, chapterId, opts);
               });
             }
             return;
           }
           if (state.activeSection === sectionId && state.activeChapter === chapterId) {
-            doLoadChapter(sectionId, chapterId);
+            doLoadChapter(sectionId, chapterId, opts);
           }
         });
         return;
@@ -1415,6 +1481,7 @@
     }
     if (!chapter.content) return;
 
+    document.body.classList.remove('home-page');
     state.activeSection = sectionId;
     state.activeChapter = chapterId;
     removeParallaxShapes();
@@ -1424,14 +1491,6 @@
     updateSidebarToggleVisibility();
 
     Store.setLastRead(sectionId, chapterId);
-
-    var key = chKey(sectionId, chapterId);
-    if (!Store.isComplete(key)) {
-      Store.toggleComplete(key);
-      buildNavigation();
-      setActiveNav(sectionId, chapterId);
-      updateProgressSummary();
-    }
 
     var domainObj = getDomain(sectionId);
     var domainBadge = domainObj
@@ -1445,11 +1504,14 @@
       h('h1', { class: 'chapter-title', text: chapter.title })
     ]);
     var mdDiv = h('div', { class: 'md-content', html: marked.parse(displayContent) });
+    /* Wrap chapter content in the same liquid-glass material family as the shell. */
+    var glassWrap = h('div', { class: 'chapter-glass-wrap' });
+    glassWrap.appendChild(badge);
+    glassWrap.appendChild(chapterHeader);
+    glassWrap.appendChild(renderChapterActions(sectionId, chapterId));
+    glassWrap.appendChild(mdDiv);
     dom.contentArea.innerHTML = '';
-    dom.contentArea.appendChild(badge);
-    dom.contentArea.appendChild(chapterHeader);
-    dom.contentArea.appendChild(renderChapterActions(sectionId, chapterId));
-    dom.contentArea.appendChild(mdDiv);
+    dom.contentArea.appendChild(glassWrap);
 
     highlightCode();
     wrapSubSections();
@@ -1464,10 +1526,13 @@
     observeContent();
     setActiveNav(sectionId, chapterId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateDocumentMeta(section, chapter);
 
-    var url = new URL(window.location);
-    url.hash = sectionId + '/' + chapterId;
-    history.pushState(null, '', url);
+    if (!opts.noHistory) {
+      var url = getChapterUrl(sectionId, chapterId);
+      if (opts.replaceHistory) history.replaceState(null, '', url);
+      else history.pushState(null, '', url);
+    }
   }
 
   // ===================== CHAPTER TOC =====================
@@ -1485,7 +1550,7 @@
         data: { target: id, level: heading.tagName[1] },
         on: { click: function () {
           var t = document.getElementById(id);
-          if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+          if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - getHeaderClearance(), behavior: 'smooth' });
         }}
       }));
     });
@@ -1498,10 +1563,24 @@
 
   function updateTocActive(headings) {
     var activeId = null;
-    headings.forEach(function (el) { if (el.getBoundingClientRect().top <= 100) activeId = el.id; });
+    var threshold = getHeaderClearance() + 8;
+    headings.forEach(function (el) { if (el.getBoundingClientRect().top <= threshold) activeId = el.id; });
     dom.chapterTocNav.querySelectorAll('.toc-link').forEach(function (l) {
       l.classList.toggle('active', l.dataset.target === activeId);
     });
+  }
+
+  function getHeaderClearance() {
+    var fallback = 112;
+    try {
+      var computed = getComputedStyle(document.documentElement);
+      var parsed = parseFloat(computed.scrollPaddingTop);
+      if (Number.isFinite(parsed)) return parsed;
+      var header = dom.header || document.querySelector('.header');
+      return header ? header.getBoundingClientRect().bottom + 24 : fallback;
+    } catch (e) {
+      return fallback;
+    }
   }
 
   function removeTocScroll() {
@@ -1665,6 +1744,26 @@
 
   function initParallaxShapes() {
     removeParallaxShapes();
+
+    /* Prefer the WebGL backdrop when available — it carries the same
+     * domain-tinted blob aesthetic but with depth, parallax, and theme
+     * syncing. We mark the state with a sentinel so removeParallaxShapes
+     * knows whether there's any DOM to clean up. */
+    if (window.AetherBg && window.AetherBg.isActive && window.AetherBg.isActive()) {
+      var theme = document.documentElement.getAttribute('data-theme') || 'light';
+      try { window.AetherBg.setTheme(theme); } catch(e) {}
+      parallaxState = { aether: true };
+      return;
+    }
+    if (window.AetherBg && window.AetherBg.init && window.AetherBg.init()) {
+      var theme2 = document.documentElement.getAttribute('data-theme') || 'light';
+      try { window.AetherBg.setTheme(theme2); } catch(e) {}
+      parallaxState = { aether: true };
+      return;
+    }
+
+    /* Graceful fallback: the original CSS parallax blobs. Used when WebGL is
+     * blocked or the import fails. Identical behaviour to the pre-3D site. */
     var shapes = [
       { size: 300, x: '8%',  y: 80,  speed: 0.3,  color: 'var(--accent)' },
       { size: 180, x: '78%', y: 180, speed: 0.5,  color: 'var(--domain-ms)' },
@@ -1695,11 +1794,19 @@
   }
 
   function removeParallaxShapes() {
-    if (parallaxState) {
-      parallaxState.container.remove();
-      window.removeEventListener('scroll', parallaxState.handler);
-      parallaxState = null;
+    /* Always tear down the welcome 3D scene when leaving the welcome page —
+     * keeps the GPU idle while the user reads chapters. */
+    if (window.AetherWelcome && window.AetherWelcome.isActive && window.AetherWelcome.isActive()) {
+      try { window.AetherWelcome.dispose(); } catch(e) {}
     }
+
+    if (!parallaxState) return;
+
+    /* WebGL bg keeps running site-wide — only CSS-fallback containers need
+     * removing here. */
+    if (parallaxState.container) parallaxState.container.remove();
+    if (parallaxState.handler) window.removeEventListener('scroll', parallaxState.handler);
+    parallaxState = null;
   }
 
   function initRippleEffect() {
@@ -1744,9 +1851,11 @@
 
   // ===================== WELCOME PAGE =====================
   function showWelcome() {
+    document.body.classList.add('home-page');
     state.activeSection = null;
     state.activeChapter = null;
     state.activeDomainFilter = null;
+    updateDocumentMeta();
     updateSearchPlaceholder();
     dom.sidebarNav.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
     dom.chapterToc.classList.remove('visible');
@@ -1796,22 +1905,44 @@
     }
 
     var totalChapters = CONTENT.reduce(function(a,s){ return a + s.chapters.length; }, 0);
-    var completedCount = Object.keys(Store.getCompleted()).length;
+
+    /* Stage element for the 3D welcome scene — mounted into below. The class
+     * `welcome-3d-active` is added by AetherWelcome.mount() on success, which
+     * hides the legacy emoji icon via CSS. */
+    var welcome3dStage = h('div', { class: 'welcome-3d-stage' });
 
     var welcome = h('div', { class: 'welcome' }, [
+      welcome3dStage,
       h('div', { class: 'welcome-icon', text: GUIDE_ICON }),
       h('h1', { text: GUIDE_TITLE }),
       h('p', { html: 'Your complete reference across <strong>' + DOMAINS.length + ' domains</strong> and <strong>' + totalChapters + ' chapters</strong> of software engineering knowledge.' }),
       h('div', { class: 'welcome-stats' }, [
         stat(DOMAINS.length, 'Domains'),
         stat(CONTENT.length, 'Sections'),
-        stat(totalChapters, 'Chapters'),
-        stat(completedCount, 'Completed')
+        stat(totalChapters, 'Chapters')
       ]),
     ]);
 
     dom.contentArea.innerHTML = '';
     dom.contentArea.appendChild(welcome);
+
+    /* Mount the 3D welcome scene if WebGL is available. The orbiters are
+     * coloured per-domain and clicking one fires the same onDomainClick
+     * handler the cards below already use. */
+    if (window.AetherWelcome && window.AetherWelcome.mount) {
+      try {
+        var domainSeeds = DOMAINS.map(function (d) {
+          var cssVar = '--domain-' + d.file;
+          var col = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim() || '#b09828';
+          return { prefix: d.prefix, label: d.label, color: col };
+        });
+        window.AetherWelcome.mount(welcome3dStage, {
+          domains: domainSeeds,
+          size: 320,
+          onDomainClick: onDomainClick,
+        });
+      } catch(e) { /* fall through — emoji icon stays visible */ }
+    }
 
     var lastRead = Store.getLastRead();
     if (lastRead) {
@@ -1820,7 +1951,7 @@
       if (lrChapter) {
         var resumeBanner = h('div', { class: 'resume-banner', on: { click: function() {
           var d = getDomain(lastRead.s);
-          if (d) { state.activeDomainFilter = d.prefix; updateSearchPlaceholder(); }
+          if (d) { state.activeDomainFilter = d.prefix; updateSearchPlaceholder(); buildNavigation(); }
           loadChapter(lastRead.s, lastRead.c);
         }}});
         resumeBanner.appendChild(h('div', { class: 'resume-text', html: '<strong>Continue reading:</strong> ' + lrChapter.title }));
@@ -1855,18 +1986,31 @@
     document.querySelector('.header').classList.toggle('scrolled', top > 10);
   }
 
-  // ===================== HASH ROUTING =====================
-  function handleHash() {
-    var hash = window.location.hash.slice(1);
-    if (!hash) return false;
-    var parts = hash.split('/');
-    if (parts.length < 2) return false;
-    var sid = parts[0], cid = parts.slice(1).join('/');
+  // ===================== URL ROUTING =====================
+  // Query routes are crawlable as distinct URLs on static hosts:
+  // `?section=ms-learning&chapter=quick-reference...`.
+  // Legacy `#section/chapter` URLs still load and are replaced with query URLs.
+  function handleRoute() {
+    var url = new URL(window.location);
+    var sid = url.searchParams.get('section');
+    var cid = url.searchParams.get('chapter');
+    var replaceHistory = false;
+
+    if (!sid || !cid) {
+      var hash = window.location.hash.slice(1);
+      if (!hash) return false;
+      var parts = hash.split('/');
+      if (parts.length < 2) return false;
+      sid = parts[0];
+      cid = parts.slice(1).join('/');
+      replaceHistory = true;
+    }
+
     var sec = CONTENT.find(function (s) { return s.id === sid; });
     if (sec) {
       var domain = getDomain(sid);
       if (domain) { state.activeDomainFilter = domain.prefix; updateSearchPlaceholder(); buildNavigation(); }
-      loadChapter(sid, cid);
+      loadChapter(sid, cid, { noHistory: !replaceHistory, replaceHistory: replaceHistory });
       return true;
     }
     return false;
@@ -1911,7 +2055,6 @@
     dom.chapterTocNav     = document.getElementById('chapter-toc-nav');
     dom.sidebarToggle     = document.getElementById('sidebar-toggle');
     dom.guideMain         = document.querySelector('.guide-main');
-    dom.progressSummary   = document.getElementById('sidebar-progress-summary');
 
     configureMarked();
     initTheme();
@@ -1928,10 +2071,10 @@
         buildNavigation();
         initFuse();
       });
-      if (!state.activeChapter && !handleHash()) showWelcome();
+      if (!state.activeChapter && !handleRoute()) showWelcome();
     });
 
-    if (!handleHash()) showWelcome();
+    if (!handleRoute()) showWelcome();
 
     dom.themeToggle.addEventListener('click', toggleTheme);
     dom.themeToggle.addEventListener('keydown', function (e) { if (e.key === 'Enter') toggleTheme(); });
@@ -1950,7 +2093,7 @@
     dom.backToTop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
     window.addEventListener('scroll', updateProgress, { passive: true });
     window.addEventListener('resize', updateSidebarToggleVisibility);
-    window.addEventListener('popstate', function () { if (!handleHash()) showWelcome(); });
+    window.addEventListener('popstate', function () { if (!handleRoute()) showWelcome(); });
 
     function onSearch(e) {
       clearTimeout(searchTimer);
