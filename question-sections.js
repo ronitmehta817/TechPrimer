@@ -1,19 +1,4 @@
-/* eslint-disable */
-/**
- * Interview question sections for the AllWeb runtime.
- *
- * This file consolidates the message queue and Spring datasets so the app
- * can load them with a single script tag.
- */
 
-/**
- * Message Queues — Questions & Answers
- *
- * Keyed by the exact section heading from INTERVIEW-QUESTIONS.md.
- * Source of truth is still the .md file; this file is generated/maintained
- * alongside it so the web app can load the content without a fetch()
- * (works on file:// too).
- */
 var MESSAGE_QUEUE_QUESTION_SECTIONS = {
   "Fundamentals": [
     "## Fundamentals",
