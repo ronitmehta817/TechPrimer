@@ -12,14 +12,22 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   var DEFAULT_LANG = 'plaintext';
   var GUIDE_TITLE  = 'Tech Primer';
   var GUIDE_ICON   = '\uD83D\uDCDA';
-  var SITE_ORIGIN  = 'https://tech-primer.ronitmehta817.workers.dev/' 
-  var SITE_DESCRIPTION = 'A complete software engineering learning guide for system design, microservices, message queues, and Spring Framework.';
+  var SITE_ORIGIN  = 'https://tech-primer.ronitmehta817.workers.dev/';
+  var SITE_DESCRIPTION = 'A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.';
+
 
   var DOMAINS = [
-    { prefix: 'sd-',     label: 'System Design',    icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd' },
-    { prefix: 'ms-',     label: 'Microservices',     icon: '\uD83D\uDD17',        desc: 'Architecture patterns, communication, data management, resilience, and deployment.', file: 'ms' },
-    { prefix: 'mq-',     label: 'Message Queues',    icon: '\uD83D\uDCEC',        desc: 'Messaging patterns, reliability, Kafka, RabbitMQ, event-driven architecture.', file: 'mq' },
-    { prefix: 'spring-', label: 'Spring Framework',  icon: '\uD83C\uDF31',        desc: 'Spring Core, Spring Boot, AOP, JDBC, Hibernate, and MVC.', file: 'spring' }
+    { prefix: 'sd-',     label: 'System Design',    icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd',     category: 'arch' },
+    { prefix: 'ms-',     label: 'Microservices',     icon: '\uD83D\uDD17',        desc: 'Architecture patterns, communication, data management, resilience, and deployment.',          file: 'ms',     category: 'arch' },
+    { prefix: 'mq-',     label: 'Message Queues',    icon: '\uD83D\uDCEC',        desc: 'Messaging patterns, reliability, Kafka, RabbitMQ, event-driven architecture.',                  file: 'mq',     category: 'arch' },
+    { prefix: 'dp-',     label: 'Design Patterns',   icon: '\uD83E\uDDE9',        desc: 'Creational, structural, and behavioral object-oriented design patterns in Java.',               file: 'dp',     category: 'code' },
+    { prefix: 'spring-', label: 'Spring Framework',  icon: '\uD83C\uDF31',        desc: 'Spring Core, Spring Boot, AOP, JDBC, Hibernate, and MVC.',                                      file: 'spring', category: 'code' }
+  ];
+
+  // Domain categories drive the grouped welcome page layout.
+  var DOMAIN_CATEGORIES = [
+    { key: 'arch', label: 'Systems & Architecture', desc: 'High-level architecture, scalability, and distributed systems.' },
+    { key: 'code', label: 'Code & Frameworks',      desc: 'Object-oriented design and the Spring ecosystem.' }
   ];
 
   var ICONS = {
@@ -64,9 +72,35 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     return el;
   }
 
-  function readingTime(text) {
-    var words = text.replace(/[#*`\[\]()|\->\~\_\!\^]/g, ' ').trim().split(/\s+/).filter(function (w) { return w.length > 0; });
-    return Math.max(1, Math.ceil(words.length / 100)) + ' min';
+  // readingTime is hot - called for every chapter on every nav rebuild.
+  // The result only depends on chapter content, so cache it on the chapter
+  // object the first time we see it.
+  var READING_TIME_RX = /[#*`\[\]()|\->\~\_\!\^]/g;
+  var WHITESPACE_RX = /\s+/;
+  function computeReadingTime(text) {
+    if (!text) return '';
+    var stripped = text.replace(READING_TIME_RX, ' ');
+    // Avoid the .filter() pass and full split into an array; estimate word
+    // count by counting whitespace-delimited chunks while walking once.
+    var len = stripped.length;
+    var count = 0;
+    var inWord = false;
+    for (var i = 0; i < len; i++) {
+      var c = stripped.charCodeAt(i);
+      var isWs = (c === 32 || c === 9 || c === 10 || c === 13);
+      if (!isWs) {
+        if (!inWord) { count++; inWord = true; }
+      } else {
+        inWord = false;
+      }
+    }
+    return Math.max(1, Math.ceil(count / 100)) + ' min';
+  }
+  function readingTime(text, chapter) {
+    if (chapter && chapter._readingTime) return chapter._readingTime;
+    var rt = computeReadingTime(text);
+    if (chapter) chapter._readingTime = rt;
+    return rt;
   }
 
   function getDomain(sectionId) {
@@ -450,7 +484,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
           h('span', { class: 'nav-item-dot' }),
           h('span', { class: 'nav-item-title', text: ch.title }),
           isBookmarked ? h('span', { class: 'nav-item-star', html: svg('starFill', 12) }) : null,
-          h('span', { class: 'nav-item-time', text: ch.content ? readingTime(ch.content) : '' })
+          h('span', { class: 'nav-item-time', text: ch.content ? readingTime(ch.content, ch) : '' })
         ].filter(Boolean));
         itemsContainer.appendChild(navItem);
       });
@@ -494,6 +528,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   function highlightCode() {
     dom.contentArea.querySelectorAll('pre code').forEach(function (block) {
+      // Mermaid blocks are converted to SVG diagrams later; never let
+      // highlight.js touch them - it strips the original textContent on
+      // reprocess and removes the language-mermaid class on some builds.
+      if (block.classList.contains('language-mermaid') || block.classList.contains('lang-mermaid')) return;
       var hasLang = false;
       block.classList.forEach(function (c) { if (c.indexOf('language-') === 0) hasLang = true; });
       if (!hasLang) block.classList.add('language-' + DEFAULT_LANG);
@@ -823,19 +861,32 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function renderMermaidDiagrams() {
-    if (!state.mermaidReady) return;
+    // Lazy init in case Mermaid hadn't finished loading when init() ran.
+    if (!state.mermaidReady) initMermaid();
+    if (!state.mermaidReady) {
+      // Mermaid still missing - retry shortly so we don't silently drop diagrams.
+      setTimeout(renderMermaidDiagrams, 200);
+      return;
+    }
     var md = dom.contentArea.querySelector('.md-content');
     if (!md) return;
 
-    var imgs = md.querySelectorAll('img[src*="mermaid.ink"]');
     var pending = [];
+    var codeBlocks = md.querySelectorAll('pre code.language-mermaid, pre code.lang-mermaid');
+    codeBlocks.forEach(function(code) {
+      var pre = code.closest('pre');
+      if (!pre) return;
+      pending.push({ sourceEl: pre, code: code.textContent || '', originalSrc: null });
+    });
+
+    var imgs = md.querySelectorAll('img[src*="mermaid.ink"]');
     imgs.forEach(function(img) {
       var src = img.getAttribute('src') || '';
       var decoded = extractMermaidSourceFromMermaidInkUrl(src);
       // Even if we can't decode the source locally, capture the img so we can
       // render it as a themed mermaid.ink fallback instead of leaving a stray
       // light-theme <img> on a dark background.
-      pending.push({ img: img, code: decoded, originalSrc: src });
+      pending.push({ sourceEl: img, code: decoded, originalSrc: src });
     });
 
     if (!pending.length) return;
@@ -850,9 +901,9 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       if (item.originalSrc) container.setAttribute('data-mermaid-ink-src', item.originalSrc);
       wrapper.appendChild(container);
 
-      var skeleton = item.img.closest('.img-skeleton-wrap');
+      var skeleton = item.sourceEl.closest('.img-skeleton-wrap');
       if (skeleton) skeleton.parentNode.replaceChild(wrapper, skeleton);
-      else if (item.img.parentNode) item.img.parentNode.replaceChild(wrapper, item.img);
+      else if (item.sourceEl.parentNode) item.sourceEl.parentNode.replaceChild(wrapper, item.sourceEl);
 
       if (item.code) {
         renderMermaidInto(container, item.code, item.originalSrc);
@@ -940,6 +991,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       if (!code) return;
       var lang = 'code';
       code.classList.forEach(function (c) { if (c.indexOf('language-') === 0) lang = c.replace('language-', ''); });
+      if (lang === 'mermaid') return;
       var display = lang.charAt(0).toUpperCase() + lang.slice(1);
       display = display.replace('Plaintext', 'Text').replace('Js', 'JavaScript').replace('Ts', 'TypeScript');
       var copyBtn = h('button', { class: 'copy-btn', html: svg('copy') + ' Copy' });
@@ -1496,7 +1548,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     var domainBadge = domainObj
       ? '<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;background:var(--accent-light);color:var(--accent);margin-right:8px;">' + domainObj.icon + ' ' + domainObj.label + '</span>'
       : '';
-    var time = readingTime(chapter.content);
+    var time = readingTime(chapter.content, chapter);
     var badge = h('div', { class: 'reading-time-badge', html: domainBadge + svg('clock', 14) + ' ' + time + ' read' });
     var displayContent = stripMatchingLeadingHeading(chapter.content, chapter.title);
     var chapterHeader = h('div', { class: 'chapter-header' }, [
@@ -1769,7 +1821,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       { size: 180, x: '78%', y: 180, speed: 0.5,  color: 'var(--domain-ms)' },
       { size: 220, x: '55%', y: 420, speed: 0.2,  color: 'var(--domain-mq)' },
       { size: 140, x: '18%', y: 520, speed: 0.4,  color: 'var(--domain-sd)' },
-      { size: 260, x: '88%', y: 60,  speed: 0.15, color: 'var(--accent)' }
+      { size: 260, x: '88%', y: 60,  speed: 0.15, color: 'var(--accent)' },
+      { size: 160, x: '34%', y: 260, speed: 0.25, color: 'var(--domain-dp)' }
     ];
     var container = document.createElement('div');
     container.className = 'parallax-shapes';
@@ -1882,11 +1935,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       });
     }
 
-    var domainsGrid = h('div', { class: 'welcome-domains' });
-    DOMAINS.forEach(function (d) {
+    function makeDomainCard(d) {
       var secs = CONTENT.filter(function (s) { return s.id.indexOf(d.prefix) === 0; });
       var chCount = secs.reduce(function(a,s){ return a + s.chapters.length; }, 0);
-      var card = h('div', { class: 'welcome-domain', data: { domain: d.prefix }, on: { click: function () { onDomainClick(d.prefix); } } }, [
+      return h('div', { class: 'welcome-domain', data: { domain: d.prefix }, on: { click: function () { onDomainClick(d.prefix); } } }, [
         h('div', { class: 'welcome-domain-icon', text: d.icon }),
         h('h3', { text: d.label }),
         h('p', { text: d.desc }),
@@ -1894,8 +1946,40 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
           h('span', { class: 'welcome-domain-count', text: chCount + ' chapter' + (chCount !== 1 ? 's' : '') })
         ])
       ]);
-      domainsGrid.appendChild(card);
+    }
+
+    var domainsContainer = h('div', { class: 'welcome-domains-container' });
+    DOMAIN_CATEGORIES.forEach(function (cat) {
+      var catDomains = DOMAINS.filter(function (d) { return d.category === cat.key; });
+      if (!catDomains.length) return;
+      var grid = h('div', { class: 'welcome-domains welcome-domains-' + catDomains.length });
+      catDomains.forEach(function (d) { grid.appendChild(makeDomainCard(d)); });
+      var group = h('div', { class: 'welcome-category' }, [
+        h('div', { class: 'welcome-category-header' }, [
+          h('span', { class: 'welcome-category-label', text: cat.label }),
+          h('span', { class: 'welcome-category-count', text: catDomains.length + (catDomains.length === 1 ? ' domain' : ' domains') })
+        ]),
+        cat.desc ? h('div', { class: 'welcome-category-desc', text: cat.desc }) : null,
+        grid
+      ].filter(Boolean));
+      domainsContainer.appendChild(group);
     });
+
+    // Any domain not assigned to a known category falls back to its own group
+    // so no chapter goes missing if categorization drifts later.
+    var uncategorized = DOMAINS.filter(function (d) {
+      return !DOMAIN_CATEGORIES.some(function (c) { return c.key === d.category; });
+    });
+    if (uncategorized.length) {
+      var grid = h('div', { class: 'welcome-domains welcome-domains-' + uncategorized.length });
+      uncategorized.forEach(function (d) { grid.appendChild(makeDomainCard(d)); });
+      domainsContainer.appendChild(h('div', { class: 'welcome-category' }, [
+        h('div', { class: 'welcome-category-header' }, [
+          h('span', { class: 'welcome-category-label', text: 'Other' })
+        ]),
+        grid
+      ]));
+    }
 
     function stat(val, label) {
       return h('div', { class: 'welcome-stat' }, [
@@ -1961,7 +2045,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     }
 
     dom.contentArea.appendChild(h('div', { class: 'welcome-domain-label', text: 'Choose a Domain', style: { marginTop: '16px' } }));
-    dom.contentArea.appendChild(domainsGrid);
+    dom.contentArea.appendChild(domainsContainer);
     initCardTilt();
     initRippleEffect();
     initParallaxShapes();
@@ -2058,17 +2142,31 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     configureMarked();
     initTheme();
-    initMermaid();
     initContentFromManifest();
     buildNavigation();
     applyPreferences();
     setupPreferences();
 
+    // Defer Mermaid init until idle - it's only used inside chapter content,
+    // and the welcome page never has any diagrams. Falls back to setTimeout
+    // when requestIdleCallback isn't available.
+    var idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 0); };
+    idle(function () { initMermaid(); });
+
+    // Coalesce repeated buildNavigation calls during async content loads
+    // into a single rebuild after everything settles.
+    var navRebuildScheduled = false;
+    function scheduleNavRebuild() {
+      if (navRebuildScheduled) return;
+      navRebuildScheduled = true;
+      idle(function () { navRebuildScheduled = false; buildNavigation(); });
+    }
+
     ensureAllContentLoaded(function() {
-      buildNavigation();
+      scheduleNavRebuild();
       initFuse();
       prefetchExternalChapters(function() {
-        buildNavigation();
+        scheduleNavRebuild();
         initFuse();
       });
       if (!state.activeChapter && !handleRoute()) showWelcome();

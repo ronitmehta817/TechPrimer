@@ -26,6 +26,8 @@
 // caching SW traded offline support for painful cache-invalidation bugs, so
 // we've removed it entirely. This inline script runs before any other script
 // so even stale app.js bundles still get the cleanup treatment.
+
+
 (function () {
   if (!('serviceWorker' in navigator)) return;
   var needReload = false;
@@ -66,7 +68,7 @@
      https:// URLs. -->
 <script src="vendor.js?v=20260428-vendor1"></script>
 
-    <link rel="stylesheet" href="styles.css?v=20260430-code-toolbar">
+    <link rel="stylesheet" href="styles.css?v=20260504-domain-categories">
 </head>
 <body class="home-page">
     <canvas id="bg-3d-canvas" aria-hidden="true"></canvas>
@@ -188,9 +190,9 @@
          now done at the top of app.js's IIFE — inline scripts can't be
          deferred, and we need this rename to happen after content.js. -->
     <script defer src="question-sections.js?v=20260418-remove-pdf-export"></script>
-    <script defer src="content.js?v=20260430-remove-crosslinks"></script>
+    <script defer src="content.js?v=20260504-newline-notes"></script>
     <script type="module" src="three-bg.js?v=20260430-globe-scale10"></script>
-    <script type="module" src="three-welcome.js?v=20260428-szoom1"></script>
-    <script defer src="app.js?v=20260430-code-toolbar"></script>
+    <script type="module" src="three-welcome.js?v=20260504-design-patterns"></script>
+    <script defer src="app.js?v=20260504-perf-pass1"></script>
 </body>
 </html>
