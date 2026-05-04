@@ -27,7 +27,6 @@
 // we've removed it entirely. This inline script runs before any other script
 // so even stale app.js bundles still get the cleanup treatment.
 
-
 (function () {
   if (!('serviceWorker' in navigator)) return;
   var needReload = false;
@@ -68,7 +67,7 @@
      https:// URLs. -->
 <script src="vendor.js?v=20260428-vendor1"></script>
 
-    <link rel="stylesheet" href="styles.css?v=20260504-domain-categories">
+    <link rel="stylesheet" href="styles.css?v=20260504-shell-edge">
 </head>
 <body class="home-page">
     <canvas id="bg-3d-canvas" aria-hidden="true"></canvas>
@@ -189,8 +188,8 @@
          `CONTENT_FULL` rename that used to live as an inline bridge here is
          now done at the top of app.js's IIFE — inline scripts can't be
          deferred, and we need this rename to happen after content.js. -->
-    <script defer src="question-sections.js?v=20260418-remove-pdf-export"></script>
-    <script defer src="content.js?v=20260504-newline-notes"></script>
+    <script defer src="question-sections.js?v=20260504-dp-questions"></script>
+    <script defer src="content.js?v=20260504-trim-overview"></script>
     <script type="module" src="three-bg.js?v=20260430-globe-scale10"></script>
     <script type="module" src="three-welcome.js?v=20260504-design-patterns"></script>
     <script defer src="app.js?v=20260504-perf-pass1"></script>
