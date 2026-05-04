@@ -2,8 +2,8 @@
  * Tech Primer · Welcome 3D Hero — Network Topology
  *
  * A scroll-reactive 3D system topology rendered in the welcome hero. A central
- * iridescent hub is connected by glowing edges to four domain satellite nodes
- * (System Design, Microservices, Message Queues, Spring), with small data
+ * iridescent hub is connected by glowing edges to domain satellite nodes
+ * (System Design, Microservices, Message Queues, Spring, Design Patterns), with small data
  * packets travelling along the edges in both directions. Faint sub-nodes form
  * a background mesh that hints at a wider network.
  *
@@ -32,12 +32,13 @@ const prefersReducedMotion = typeof window.matchMedia === 'function'
   ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
   : false;
 
-/* Tetrahedral-ish placement so all four nodes are equally readable. */
+/* Radial placement so all domain nodes stay readable around the hub. */
 const NODE_LAYOUT = [
-  { x:  1.55, y:  0.75, z:  0.55 },   // sd
-  { x: -1.55, y:  0.75, z: -0.55 },   // ms
-  { x:  1.55, y: -0.75, z: -0.55 },   // mq
-  { x: -1.55, y: -0.75, z:  0.55 },   // spring
+  { x:  0.00, y:  1.62, z:  0.50 },   // sd
+  { x: -1.54, y:  0.50, z: -0.35 },   // ms
+  { x:  1.54, y:  0.50, z: -0.35 },   // mq
+  { x: -0.95, y: -1.30, z:  0.45 },   // spring
+  { x:  0.95, y: -1.30, z:  0.45 },   // design patterns
 ];
 
 /* Sub-nodes drift around the network as a faint background mesh. */
@@ -162,6 +163,7 @@ class NetworkScene {
       () => new THREE.TetrahedronGeometry(0.36, 0),   // ms
       () => new THREE.DodecahedronGeometry(0.30, 0),  // mq
       () => new THREE.IcosahedronGeometry(0.32, 0),   // spring
+      () => new THREE.BoxGeometry(0.46, 0.46, 0.46),   // design patterns
     ];
 
     this.domainNodes = [];
@@ -237,7 +239,7 @@ class NetworkScene {
 
     /* Sparse domain↔domain links to give the topology its mesh feel. Picking
      * 4 of the 6 possible pairs at deterministic offsets so it's stable. */
-    const pairs = [[0, 1], [1, 3], [2, 3], [0, 2]];
+    const pairs = [[0, 1], [0, 2], [1, 3], [2, 4], [3, 4]];
     const dimColor = new THREE.Color(0x888080).multiplyScalar(0.5);
     for (const [a, b] of pairs) {
       const na = this.domainNodes[a]; const nb = this.domainNodes[b];
