@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tech-primer.ronitmehta817.workers.dev/sitemap.xml

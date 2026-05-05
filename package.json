@@ -1,0 +1,15 @@
+{
+  "name": "tech-primer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "kv:create": "wrangler kv namespace create USER_STORE",
+    "kv:create:preview": "wrangler kv namespace create USER_STORE --preview",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.87.0"
+  }
+}

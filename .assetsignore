@@ -1,0 +1,14 @@
+src/
+wrangler.toml
+.assetsignore
+.dev.vars
+.dev.vars.example
+.wrangler/
+node_modules/
+package.json
+package-lock.json
+README-AUTH.md
+COMMANDS.md
+auth-prompt.md
+.gitignore
+.git/

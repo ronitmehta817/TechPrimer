@@ -1,0 +1,41 @@
+# Cloudflare Worker config for tech-primer.
+#
+# BEFORE FIRST DEPLOY:
+#   1. Run `npm run kv:create` and paste the returned `id` into the
+#      [[kv_namespaces]] block below as `id`.
+#   2. Run `npm run kv:create:preview` and paste the returned `id` into
+#      `preview_id` (used by `wrangler dev`).
+#   3. Set the two secrets via `npx wrangler secret put` (see README-AUTH.md):
+#        - GOOGLE_CLIENT_SECRET
+#        - SESSION_SECRET   (use `openssl rand -hex 32`)
+#   4. Either uncomment the [vars] block below with your real client id, or
+#      set GOOGLE_CLIENT_ID via the Cloudflare dashboard. It's a public value
+#      so committing it to source control is fine.
+#
+# Static files in this directory are served via the [assets] binding
+# below; .assetsignore controls which files DON'T get uploaded.
+
+name = "tech-primer"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[kv_namespaces]]
+binding = "USER_STORE"
+id = "8db908f3c7374b92a04b79f774829882"
+preview_id = "09f5ce6e3ed64d3991a5db132bec16fd"
+
+# Public, non-secret env vars. GOOGLE_CLIENT_ID is exposed to the browser
+# anyway in the OAuth redirect URL, so it doesn't need to be a Worker
+# secret. Uncomment and fill in to commit it from source control; otherwise
+# set it via the Cloudflare dashboard or `wrangler secret put`.
+# [vars]
+# GOOGLE_CLIENT_ID = "your-google-client-id.apps.googleusercontent.com"
+
+[observability]
+enabled = true
