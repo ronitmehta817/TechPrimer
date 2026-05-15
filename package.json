@@ -7,7 +7,8 @@
     "deploy": "wrangler deploy",
     "kv:create": "wrangler kv namespace create USER_STORE",
     "kv:create:preview": "wrangler kv namespace create USER_STORE --preview",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "build:mindmaps": "node scripts/build-mindmaps.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.87.0"
