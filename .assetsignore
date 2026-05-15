@@ -12,3 +12,4 @@ COMMANDS.md
 auth-prompt.md
 .gitignore
 .git/
+scripts/
