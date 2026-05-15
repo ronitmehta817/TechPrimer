@@ -7,41 +7,41 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   'use strict';
 
   // ===================== CONFIG =====================
-  var THEME_KEY    = 'tech-primer-theme';
-  var STORAGE_PFX  = 'tp-';
+  var THEME_KEY = 'tech-primer-theme';
+  var STORAGE_PFX = 'tp-';
   var DEFAULT_LANG = 'plaintext';
-  var GUIDE_TITLE  = 'Tech Primer';
-  var GUIDE_ICON   = '\uD83D\uDCDA';
-  var SITE_ORIGIN  = 'https://tech-primer.ronitmehta817.workers.dev/';
+  var GUIDE_TITLE = 'Tech Primer';
+  var GUIDE_ICON = '\uD83D\uDCDA';
+  var SITE_ORIGIN = 'https://tech-primer.ronitmehta817.workers.dev/';
   var SITE_DESCRIPTION = 'A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.';
 
 
   var DOMAINS = [
-    { prefix: 'sd-',     label: 'System Design',    icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd',     category: 'arch' },
-    { prefix: 'ms-',     label: 'Microservices',     icon: '\uD83D\uDD17',        desc: 'Architecture patterns, communication, data management, resilience, and deployment.',          file: 'ms',     category: 'arch' },
-    { prefix: 'mq-',     label: 'Message Queues',    icon: '\uD83D\uDCEC',        desc: 'Messaging patterns, reliability, Kafka, RabbitMQ, event-driven architecture.',                  file: 'mq',     category: 'arch' },
-    { prefix: 'dp-',     label: 'Design Patterns',   icon: '\uD83E\uDDE9',        desc: 'Creational, structural, and behavioral object-oriented design patterns in Java.',               file: 'dp',     category: 'code' },
-    { prefix: 'spring-', label: 'Spring Framework',  icon: '\uD83C\uDF31',        desc: 'Spring Core, Spring Boot, AOP, JDBC, Hibernate, and MVC.',                                      file: 'spring', category: 'code' }
+    { prefix: 'sd-', label: 'System Design', icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd', category: 'arch' },
+    { prefix: 'ms-', label: 'Microservices', icon: '\uD83D\uDD17', desc: 'Architecture patterns, communication, data management, resilience, and deployment.', file: 'ms', category: 'arch' },
+    { prefix: 'mq-', label: 'Message Queues', icon: '\uD83D\uDCEC', desc: 'Messaging patterns, reliability, Kafka, RabbitMQ, event-driven architecture.', file: 'mq', category: 'arch' },
+    { prefix: 'dp-', label: 'Design Patterns', icon: '\uD83E\uDDE9', desc: 'Creational, structural, and behavioral object-oriented design patterns in Java.', file: 'dp', category: 'code' },
+    { prefix: 'spring-', label: 'Spring Framework', icon: '\uD83C\uDF31', desc: 'Spring Core, Spring Boot, AOP, JDBC, Hibernate, and MVC.', file: 'spring', category: 'code' }
   ];
 
   // Domain categories drive the grouped welcome page layout.
   var DOMAIN_CATEGORIES = [
     { key: 'arch', label: 'Systems & Architecture', desc: 'High-level architecture, scalability, and distributed systems.' },
-    { key: 'code', label: 'Code & Frameworks',      desc: 'Object-oriented design and the Spring ecosystem.' }
+    { key: 'code', label: 'Code & Frameworks', desc: 'Object-oriented design and the Spring ecosystem.' }
   ];
 
   var ICONS = {
-    chevron:  '<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>',
-    prevArr:  '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>',
-    nextArr:  '<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>',
-    image:    '<path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"/>',
-    refresh:  '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"/>',
-    copy:     '<path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"/>',
-    check:    '<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>',
-    clock:    '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-    star:     '<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>',
+    chevron: '<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>',
+    prevArr: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>',
+    nextArr: '<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>',
+    image: '<path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"/>',
+    refresh: '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"/>',
+    copy: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"/>',
+    check: '<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    star: '<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>',
     starFill: '<path fill="currentColor" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>',
-    note:     '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931ZM16.862 4.487L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>',
+    note: '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931ZM16.862 4.487L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>',
     playlist: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>'
   };
 
@@ -191,9 +191,9 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   function normaliseSectionIds(sections) {
     if (!Array.isArray(sections)) return sections;
-    sections.forEach(function(sec) {
+    sections.forEach(function (sec) {
       if (!sec || !Array.isArray(sec.chapters)) return;
-      sec.chapters.forEach(function(ch) {
+      sec.chapters.forEach(function (ch) {
         if (ch && typeof ch.id === 'string') ch.id = normaliseChapterId(sec.id, ch.id);
       });
     });
@@ -211,22 +211,22 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   // login_error param isn't possible. Unknown codes fall through to a
   // generic message.
   var LOGIN_ERROR_MESSAGES = {
-    oauth_access_denied:           'Sign-in was cancelled.',
-    oauth_invalid_request:         'Sign-in failed: invalid request.',
-    oauth_unauthorized_client:     'This app is not authorized.',
+    oauth_access_denied: 'Sign-in was cancelled.',
+    oauth_invalid_request: 'Sign-in failed: invalid request.',
+    oauth_unauthorized_client: 'This app is not authorized.',
     oauth_unsupported_response_type: 'Sign-in failed: unsupported response.',
-    oauth_invalid_scope:           'Sign-in failed: invalid scope.',
-    oauth_server_error:            'Google had a problem; please try again.',
+    oauth_invalid_scope: 'Sign-in failed: invalid scope.',
+    oauth_server_error: 'Google had a problem; please try again.',
     oauth_temporarily_unavailable: 'Google is temporarily unavailable.',
-    state_mismatch:                'Sign-in expired or was tampered with. Please try again.',
-    missing_state_cookie:          'Browser blocked sign-in cookies. Allow cookies and retry.',
-    missing_params:                'Sign-in failed: missing data from Google.',
-    nonce_mismatch:                'Sign-in failed integrity check. Please try again.',
-    missing_sub:                   'Sign-in failed: Google did not return your account ID.',
-    token_exchange_failed:         'Could not contact Google. Please try again.',
-    id_token_invalid:              'Sign-in failed: invalid token from Google.',
-    session_sign_failed:           'Server could not create your session. Please try again.',
-    not_configured:                'Sign-in is not configured on this server.'
+    state_mismatch: 'Sign-in expired or was tampered with. Please try again.',
+    missing_state_cookie: 'Browser blocked sign-in cookies. Allow cookies and retry.',
+    missing_params: 'Sign-in failed: missing data from Google.',
+    nonce_mismatch: 'Sign-in failed integrity check. Please try again.',
+    missing_sub: 'Sign-in failed: Google did not return your account ID.',
+    token_exchange_failed: 'Could not contact Google. Please try again.',
+    id_token_invalid: 'Sign-in failed: invalid token from Google.',
+    session_sign_failed: 'Server could not create your session. Please try again.',
+    not_configured: 'Sign-in is not configured on this server.'
   };
 
   var Auth = {
@@ -242,7 +242,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     _setUser: function (u) {
       this.user = (u && u.sub) ? u : null;
       var self = this;
-      this._listeners.forEach(function (fn) { try { fn(self.user); } catch (_) {} });
+      this._listeners.forEach(function (fn) { try { fn(self.user); } catch (_) { } });
     },
     load: function () {
       var self = this;
@@ -325,37 +325,37 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       catch (e) { return d; }
     },
     _s: function (k, v) {
-      try { localStorage.setItem(this._keyPrefix(k) + k, JSON.stringify(v)); } catch (e) {}
+      try { localStorage.setItem(this._keyPrefix(k) + k, JSON.stringify(v)); } catch (e) { }
       if (!this._suspendRemote && SYNCED_KEYS.indexOf(k) !== -1 && Auth.user) {
         this._scheduleRemotePut();
       }
     },
 
-    getLastRead:    function ()         { return this._g('last-read', null); },
-    setLastRead:    function (sid, c)   { this._s('last-read', { s: sid, c: c, t: Date.now() }); },
+    getLastRead: function () { return this._g('last-read', null); },
+    setLastRead: function (sid, c) { this._s('last-read', { s: sid, c: c, t: Date.now() }); },
 
-    getBookmarks:   function ()         { return this._g('bookmarks', {}); },
+    getBookmarks: function () { return this._g('bookmarks', {}); },
     toggleBookmark: function (key, title, sid) {
       var b = this.getBookmarks();
       if (b[key]) delete b[key]; else b[key] = { title: title, sid: sid, t: Date.now() };
       this._s('bookmarks', b);
       return !!b[key];
     },
-    isBookmarked:   function (key)      { return !!this.getBookmarks()[key]; },
+    isBookmarked: function (key) { return !!this.getBookmarks()[key]; },
 
-    getNotes:       function (key)      { return this._g('notes', {})[key] || ''; },
-    setNotes:       function (key, text){ var n = this._g('notes', {}); if (text) n[key] = text; else delete n[key]; this._s('notes', n); },
-    getAllNotes:    function ()         { return this._g('notes', {}); },
+    getNotes: function (key) { return this._g('notes', {})[key] || ''; },
+    setNotes: function (key, text) { var n = this._g('notes', {}); if (text) n[key] = text; else delete n[key]; this._s('notes', n); },
+    getAllNotes: function () { return this._g('notes', {}); },
 
-    getPlaylists:   function ()         { return this._g('playlists', []); },
-    savePlaylists:  function (p)        { this._s('playlists', p); },
+    getPlaylists: function () { return this._g('playlists', []); },
+    savePlaylists: function (p) { this._s('playlists', p); },
 
-    getPrefs:       function ()         { return this._g('prefs', { fontSize: 'M', lineSpacing: 'normal', contentWidth: 'default' }); },
-    savePrefs:      function (p)        { this._s('prefs', p); },
+    getPrefs: function () { return this._g('prefs', { fontSize: 'M', lineSpacing: 'normal', contentWidth: 'default' }); },
+    savePrefs: function (p) { this._s('prefs', p); },
 
     onChange: function (fn) { this._changeHandlers.push(fn); },
     _emitChange: function () {
-      this._changeHandlers.forEach(function (fn) { try { fn(); } catch (_) {} });
+      this._changeHandlers.forEach(function (fn) { try { fn(); } catch (_) { } });
     },
 
     // Build the synced-keys snapshot from a given prefix.
@@ -366,18 +366,18 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       }
       return {
         bookmarks: read('bookmarks', {}),
-        notes:     read('notes', {}),
+        notes: read('notes', {}),
         playlists: read('playlists', []),
-        lastRead:  read('last-read', null)
+        lastRead: read('last-read', null)
       };
     },
 
     _writeSnapshotToPrefix: function (pfx, snap) {
       function write(k, v) {
-        try { localStorage.setItem(pfx + k, JSON.stringify(v)); } catch (e) {}
+        try { localStorage.setItem(pfx + k, JSON.stringify(v)); } catch (e) { }
       }
       write('bookmarks', snap.bookmarks || {});
-      write('notes',     snap.notes || {});
+      write('notes', snap.notes || {});
       write('playlists', Array.isArray(snap.playlists) ? snap.playlists : []);
       if (snap.lastRead) write('last-read', snap.lastRead);
     },
@@ -556,7 +556,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       if (this._writeInFlight) { this._writeQueued = true; return; }
       this._writeInFlight = true;
       var snap = this._readSnapshotFromPrefix(this.pfx);
-      this._remotePut(snap).catch(function () {}).then(function () {
+      this._remotePut(snap).catch(function () { }).then(function () {
         self._writeInFlight = false;
         if (self._writeQueued) { self._writeQueued = false; self._scheduleRemotePut(); }
       });
@@ -590,7 +590,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         self.pfx = userPfx;
         self._writeSnapshotToPrefix(userPfx, merged);
         self._suspendRemote = false;
-        return self._remotePut(merged).catch(function () {}).then(function () {
+        return self._remotePut(merged).catch(function () { }).then(function () {
           self._emitChange();
           return true;
         });
@@ -635,7 +635,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   var CONTENT = [];
 
   function getContentForDomain(prefix) {
-    return CONTENT.filter(function(s) { return s.id.indexOf(prefix) === 0; });
+    return CONTENT.filter(function (s) { return s.id.indexOf(prefix) === 0; });
   }
 
   function loadDomainContent(prefix, cb) {
@@ -653,15 +653,15 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     var script = document.createElement('script');
     script.src = 'content/' + domain.file + '.js';
-    script.onload = function() {
+    script.onload = function () {
       if (window[varName]) mergeDomainContent(window[varName], prefix);
       if (cb) cb();
     };
-    script.onerror = function() {
+    script.onerror = function () {
       if (!state.contentLoaded && window.CONTENT_FALLBACK) {
         CONTENT = normaliseSectionIds(window.CONTENT_FALLBACK);
         state.contentLoaded = true;
-        DOMAINS.forEach(function(d){ state.loadedDomains[d.prefix] = true; });
+        DOMAINS.forEach(function (d) { state.loadedDomains[d.prefix] = true; });
       }
       if (cb) cb();
     };
@@ -670,8 +670,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   function mergeDomainContent(sections, prefix) {
     normaliseSectionIds(sections);
-    sections.forEach(function(sec) {
-      var exists = CONTENT.find(function(s){ return s.id === sec.id; });
+    sections.forEach(function (sec) {
+      var exists = CONTENT.find(function (s) { return s.id === sec.id; });
       if (!exists) CONTENT.push(sec);
       else {
         exists.chapters = sec.chapters;
@@ -684,11 +684,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function ensureAllContentLoaded(cb) {
-    var pending = DOMAINS.filter(function(d){ return !state.loadedDomains[d.prefix]; });
-    if (!pending.length) { if(cb) cb(); return; }
+    var pending = DOMAINS.filter(function (d) { return !state.loadedDomains[d.prefix]; });
+    if (!pending.length) { if (cb) cb(); return; }
     var loaded = 0;
-    pending.forEach(function(d) {
-      loadDomainContent(d.prefix, function() {
+    pending.forEach(function (d) {
+      loadDomainContent(d.prefix, function () {
         loaded++;
         if (loaded === pending.length && cb) cb();
       });
@@ -699,14 +699,16 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (window.CONTENT_FULL && Array.isArray(window.CONTENT_FULL)) {
       CONTENT = normaliseSectionIds(window.CONTENT_FULL);
       state.contentLoaded = true;
-      DOMAINS.forEach(function(d){ state.loadedDomains[d.prefix] = true; });
+      DOMAINS.forEach(function (d) { state.loadedDomains[d.prefix] = true; });
       return;
     }
     if (window.CONTENT_MANIFEST) {
-      CONTENT = normaliseSectionIds(window.CONTENT_MANIFEST.map(function(s) {
-        return { id: s.id, title: s.title, icon: s.icon, description: s.description || '', chapters: s.chapters.map(function(ch) {
-          return { id: ch.id, title: ch.title, parent: ch.parent || undefined, content: '' };
-        })};
+      CONTENT = normaliseSectionIds(window.CONTENT_MANIFEST.map(function (s) {
+        return {
+          id: s.id, title: s.title, icon: s.icon, description: s.description || '', chapters: s.chapters.map(function (ch) {
+            return { id: ch.id, title: ch.title, parent: ch.parent || undefined, content: '' };
+          })
+        };
       }));
     }
   }
@@ -715,8 +717,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function initFuse() {
     if (!window.Fuse) return;
     var items = [];
-    CONTENT.forEach(function(section) {
-      section.chapters.forEach(function(ch) {
+    CONTENT.forEach(function (section) {
+      section.chapters.forEach(function (ch) {
         items.push({
           sectionId: section.id,
           sectionTitle: section.title,
@@ -749,14 +751,14 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(THEME_KEY, theme);
-    var sun  = dom.themeToggle && dom.themeToggle.querySelector('.sun-icon');
+    var sun = dom.themeToggle && dom.themeToggle.querySelector('.sun-icon');
     var moon = dom.themeToggle && dom.themeToggle.querySelector('.moon-icon');
     if (sun && moon) {
-      sun.style.display  = theme === 'light' ? 'block' : 'none';
-      moon.style.display = theme === 'dark'  ? 'block' : 'none';
+      sun.style.display = theme === 'light' ? 'block' : 'none';
+      moon.style.display = theme === 'dark' ? 'block' : 'none';
     }
     if (state.mermaidReady) {
-      try { mermaid.initialize({ theme: theme === 'dark' ? 'dark' : 'default', startOnLoad: false }); } catch(e){}
+      try { mermaid.initialize({ theme: theme === 'dark' ? 'dark' : 'default', startOnLoad: false }); } catch (e) { }
     }
     if (window.AetherBg && window.AetherBg.setTheme) window.AetherBg.setTheme(theme);
     if (window.AetherWelcome && window.AetherWelcome.setTheme) window.AetherWelcome.setTheme(theme);
@@ -777,11 +779,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     document.documentElement.setAttribute('data-line-spacing', p.lineSpacing);
     document.documentElement.setAttribute('data-content-width', p.contentWidth);
 
-    ['prefs-font-size','prefs-line-spacing','prefs-content-width'].forEach(function(id) {
+    ['prefs-font-size', 'prefs-line-spacing', 'prefs-content-width'].forEach(function (id) {
       var group = document.getElementById(id);
       if (!group) return;
       var key = id === 'prefs-font-size' ? 'fontSize' : id === 'prefs-line-spacing' ? 'lineSpacing' : 'contentWidth';
-      group.querySelectorAll('button').forEach(function(btn) {
+      group.querySelectorAll('button').forEach(function (btn) {
         btn.classList.toggle('active', btn.dataset.val === p[key]);
       });
     });
@@ -789,11 +791,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function setupPreferences() {
-    ['prefs-font-size','prefs-line-spacing','prefs-content-width'].forEach(function(id) {
+    ['prefs-font-size', 'prefs-line-spacing', 'prefs-content-width'].forEach(function (id) {
       var group = document.getElementById(id);
       if (!group) return;
       var key = id === 'prefs-font-size' ? 'fontSize' : id === 'prefs-line-spacing' ? 'lineSpacing' : 'contentWidth';
-      group.addEventListener('click', function(e) {
+      group.addEventListener('click', function (e) {
         var btn = e.target.closest('button');
         if (!btn) return;
         var p = Store.getPrefs();
@@ -852,11 +854,12 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     filtered.forEach(function (section) {
       var domain = getDomain(section.id);
 
-      var headerEl = h('div', { class: 'sidebar-section-header', html:
-        '<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' + ICONS.chevron + '</svg>' +
-        '<span class="section-icon">' + section.icon + '</span>' +
-        '<span>' + section.title + '</span>' +
-        (domain ? '<span style="font-size:11px;opacity:0.6;margin-left:auto;text-transform:none;letter-spacing:0;">' + domain.label + '</span>' : '')
+      var headerEl = h('div', {
+        class: 'sidebar-section-header', html:
+          '<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' + ICONS.chevron + '</svg>' +
+          '<span class="section-icon">' + section.icon + '</span>' +
+          '<span>' + section.title + '</span>' +
+          (domain ? '<span style="font-size:11px;opacity:0.6;margin-left:auto;text-transform:none;letter-spacing:0;">' + domain.label + '</span>' : '')
       });
       var itemsContainer = h('div', { class: 'sidebar-section-items' });
 
@@ -888,7 +891,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         itemsContainer.classList.toggle('expanded');
         if (!wasExpanded) {
           var children = itemsContainer.querySelectorAll('.nav-item, .nav-group-header');
-          children.forEach(function(el, i) {
+          children.forEach(function (el, i) {
             el.classList.remove('nav-stagger');
             void el.offsetWidth;
             el.style.animationDelay = (i * 0.04) + 's';
@@ -932,6 +935,17 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     });
   }
 
+  function strategyVisualMeta(label) {
+    var key = String(label || '').replace(/:$/, '').trim().toLowerCase();
+    var map = {
+      'how it works': { kind: 'flow', badge: 'Flow' },
+      'strengths': { kind: 'plus', badge: 'Good' },
+      'watch-outs': { kind: 'risk', badge: 'Risk' },
+      'use when': { kind: 'fit', badge: 'Fit' }
+    };
+    return map[key] || null;
+  }
+
   function wrapSubSections() {
     var md = dom.contentArea.querySelector('.md-content');
     if (!md) return;
@@ -942,11 +956,23 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       var strong = p.querySelector('strong');
       if (!strong || !strong.textContent.endsWith(':')) continue;
       if (!next || (next.tagName !== 'UL' && next.tagName !== 'OL')) continue;
+
       var rest = p.textContent.replace(strong.textContent, '').trim();
-      var wrapper = h('div', { class: 'sub-section' }, [
-        h('div', { class: 'sub-section-label', text: strong.textContent }),
+      var label = strong.textContent.replace(/:$/, '');
+      var visual = strategyVisualMeta(label);
+      var wrapperAttrs = {
+        class: 'sub-section' + (visual ? ' strategy-visual-card strategy-visual-' + visual.kind : '')
+      };
+      if (visual) wrapperAttrs.data = { visual: visual.kind };
+
+      var wrapper = h('div', wrapperAttrs, [
+        h('div', { class: 'sub-section-label' }, [
+          visual ? h('span', { class: 'strategy-visual-badge', text: visual.badge }) : null,
+          h('span', { text: label })
+        ].filter(Boolean)),
         rest ? h('div', { class: 'sub-section-desc', text: rest }) : null
       ].filter(Boolean));
+
       p.parentNode.insertBefore(wrapper, p);
       wrapper.appendChild(next);
       p.remove();
@@ -979,11 +1005,219 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     });
   }
 
+  // ===================== MIND MAP MODAL =====================
+  function slugifyFileName(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  // ===================== CHAPTER MIND MAP =====================
+  // The recap is precomputed at build time by scripts/build-mindmaps.mjs
+  // and shipped as mindmaps.js (window.AllWebMindMapData). The renderer in
+  // mindmap.js looks up the chapter by id, paints colours, lays it out and
+  // returns an unattached card. This wrapper just decides *whether* to ask
+  // for a recap and where to drop the launch button. The actual map is only
+  // created after the user clicks the button, and is displayed inside a modal.
+  //
+  // We also opportunistically verify the precomputed-data checksum against
+  // the live CONTENT array on the first call. A mismatch means mindmaps.js
+  // is stale (someone edited content.js without regenerating); the recap
+  // will still render — it'll just show old labels for any freshly-edited
+  // chapters until `npm run build:mindmaps` runs.
+  function closeMindMapModal() {
+    var modal = document.querySelector('.mindmap-modal-backdrop');
+    if (!modal) return;
+    var previousOverflow = modal._previousOverflow || '';
+    if (modal._mindmapTimers) modal._mindmapTimers.forEach(function (timer) { clearTimeout(timer); });
+    modal.remove();
+    document.body.style.overflow = previousOverflow;
+  }
+
+  function openChapterMindMapModal(sectionId, chapter) {
+    var api = window.AllWebMindMap;
+    if (!api || typeof api.create !== 'function') return;
+
+    closeMindMapModal();
+    var previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    var modal = h('div', {
+      class: 'modal-backdrop mindmap-modal-backdrop',
+      role: 'presentation',
+      on: { click: function (e) { if (e.target === modal) closeMindMapModal(); } }
+    });
+    modal._previousOverflow = previousOverflow;
+
+    var box = h('div', {
+      class: 'modal-box mindmap-modal-box',
+      role: 'dialog',
+      'aria-modal': 'true',
+      'aria-labelledby': 'mindmap-modal-title'
+    });
+
+    var closeBtn = h('button', {
+      class: 'mindmap-modal-close',
+      type: 'button',
+      'aria-label': 'Close mind map',
+      on: { click: closeMindMapModal }
+    }, ['\u00d7']);
+
+    var downloadBtn = h('button', {
+      class: 'mindmap-modal-download',
+      type: 'button',
+      disabled: 'disabled',
+      'aria-disabled': 'true',
+      on: { click: function () { downloadChapterMindMap(sectionId, chapter); } }
+    }, ['Download']);
+
+    box.appendChild(h('div', { class: 'mindmap-modal-header' }, [
+      h('div', {}, [
+        h('div', { class: 'mindmap-modal-eyebrow', text: 'Chapter Mind Map' }),
+        h('h3', { id: 'mindmap-modal-title', text: chapter.title || 'Chapter Mind Map' })
+      ]),
+      h('div', { class: 'mindmap-modal-actions' }, [downloadBtn, closeBtn])
+    ]));
+
+    var body = h('div', { class: 'mindmap-modal-body' });
+    body.appendChild(buildMindMapGenerationState(chapter));
+    box.appendChild(body);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+    closeBtn.focus();
+
+    runMindMapGenerationSteps(modal, body, downloadBtn, sectionId, chapter);
+  }
+
+  function buildMindMapGenerationState(chapter) {
+    return h('div', { class: 'mindmap-generation' }, [
+      h('div', { class: 'mindmap-generation-orb' }),
+      h('div', { class: 'mindmap-generation-title', text: 'Generating mind map' }),
+      h('div', {
+        class: 'mindmap-generation-subtitle',
+        text: 'Preparing a visual recap for ' + ((chapter && chapter.title) || 'this chapter') + '.'
+      }),
+      h('div', { class: 'mindmap-generation-steps' }, [
+        h('div', { class: 'mindmap-generation-step active', data: { step: '0' } }, [
+          h('span', { class: 'mindmap-step-dot' }),
+          h('span', { class: 'mindmap-step-text', text: 'Extracting chapter data' })
+        ]),
+        h('div', { class: 'mindmap-generation-step', data: { step: '1' } }, [
+          h('span', { class: 'mindmap-step-dot' }),
+          h('span', { class: 'mindmap-step-text', text: 'Extracted headings and key points' })
+        ]),
+        h('div', { class: 'mindmap-generation-step', data: { step: '2' } }, [
+          h('span', { class: 'mindmap-step-dot' }),
+          h('span', { class: 'mindmap-step-text', text: 'Generating branches and connectors' })
+        ]),
+        h('div', { class: 'mindmap-generation-step', data: { step: '3' } }, [
+          h('span', { class: 'mindmap-step-dot' }),
+          h('span', { class: 'mindmap-step-text', text: 'Rendering mind map' })
+        ])
+      ])
+    ]);
+  }
+
+  function setMindMapGenerationStep(modal, stepIndex) {
+    if (!modal || !modal.parentNode) return;
+    modal.querySelectorAll('.mindmap-generation-step').forEach(function (step) {
+      var idx = Number(step.dataset.step);
+      step.classList.toggle('done', idx < stepIndex);
+      step.classList.toggle('active', idx === stepIndex);
+    });
+  }
+
+  function runMindMapGenerationSteps(modal, body, downloadBtn, sectionId, chapter) {
+    var api = window.AllWebMindMap;
+    var timers = [];
+    var stepMs = 2000;
+    modal._mindmapTimers = timers;
+
+    [1, 2, 3].forEach(function (stepIndex, idx) {
+      timers.push(setTimeout(function () {
+        setMindMapGenerationStep(modal, stepIndex);
+      }, stepMs * (idx + 1)));
+    });
+
+    timers.push(setTimeout(function () {
+      if (!modal.parentNode || !api || typeof api.create !== 'function') return;
+      var card = api.create({
+        sectionId:    sectionId,
+        chapterId:    chapter.id,
+        chapterTitle: chapter.title || 'Chapter'
+      });
+      if (!card) return;
+      body.innerHTML = '';
+      body.appendChild(card);
+      downloadBtn.disabled = false;
+      downloadBtn.removeAttribute('disabled');
+      downloadBtn.setAttribute('aria-disabled', 'false');
+      modal._mindmapTimers = [];
+    }, stepMs * 4));
+  }
+
+  function slugifyFileName(s) {
+    return String(s || 'chapter')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'chapter';
+  }
+
+  function downloadChapterMindMap(sectionId, chapter) {
+    var api = window.AllWebMindMap;
+    if (!api || typeof api.toSvg !== 'function' || !chapter) return;
+    var svgText = api.toSvg({
+      sectionId: sectionId,
+      chapterId: chapter.id,
+      chapterTitle: chapter.title || 'Chapter'
+    });
+    if (!svgText) return;
+
+    var blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = slugifyFileName(chapter.title || chapter.id) + '-mind-map.svg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function renderChapterMindMap(sectionId, chapter) {
+    var api = window.AllWebMindMap;
+    if (!api || typeof api.create !== 'function') return; // mindmap.js not loaded yet
+    if (!sectionId || !chapter || !chapter.id) return;
+    if (typeof api.verifyChecksum === 'function') {
+      try { api.verifyChecksum(CONTENT); } catch (_) { /* never break the page over a sanity check */ }
+    }
+    // doLoadChapter() can fire twice in quick succession (initial route +
+    // explicit nav-click), so guard against double launch cards.
+    if (dom.contentArea.querySelector('.chapter-mindmap-launch')) return;
+    var glassWrap = dom.contentArea.querySelector('.chapter-glass-wrap');
+    if (!glassWrap || !glassWrap.parentNode) return;
+
+    if (typeof api.has === 'function' && !api.has({ sectionId: sectionId, chapterId: chapter.id })) return;
+
+    var launch = h('div', { class: 'chapter-mindmap-launch' }, [
+      h('div', { class: 'chapter-mindmap-launch-copy' }, [
+        h('span', { class: 'chapter-mindmap-eyebrow', text: 'Chapter Mind Map' }),
+        h('p', { text: 'Open a colour-coded visual recap of this chapter.' })
+      ]),
+      h('button', {
+        class: 'chapter-mindmap-open',
+        type: 'button',
+        on: { click: function () { openChapterMindMapModal(sectionId, chapter); } }
+      }, ['Generate Mind Map'])
+    ]);
+
+    glassWrap.parentNode.insertBefore(launch, glassWrap.nextSibling);
+  }
+
   // ===================== CALLOUT BOXES =====================
   function parseCallouts() {
     var md = dom.contentArea.querySelector('.md-content');
     if (!md) return;
-    md.querySelectorAll('blockquote').forEach(function(bq) {
+    md.querySelectorAll('blockquote').forEach(function (bq) {
       var first = bq.querySelector('p');
       if (!first) return;
       var html = first.innerHTML;
@@ -1070,8 +1304,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function getActiveChapterContext() {
-    var section = CONTENT.find(function(s){ return s.id === state.activeSection; });
-    var chapter = section && (section.chapters || []).find(function(c){ return c.id === state.activeChapter; });
+    var section = CONTENT.find(function (s) { return s.id === state.activeSection; });
+    var chapter = section && (section.chapters || []).find(function (c) { return c.id === state.activeChapter; });
     return {
       sectionTitle: section ? section.title : '(unknown section)',
       sectionId: state.activeSection || '(none)',
@@ -1109,20 +1343,20 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         '  Preview : ' + preview + '\n' +
         '----- Diagram source -----\n' + (code || '(empty)')
       );
-    } catch (e) {}
+    } catch (e) { }
 
     container.innerHTML =
       '<div class="mermaid-error">' +
-        '<div class="mermaid-error-title">Diagram could not be rendered</div>' +
-        '<div class="mermaid-error-meta">' +
-          '<strong>' + escapeHtml(ctx.chapterTitle) + '</strong> ' +
-          '<span class="mermaid-error-sub">in ' + escapeHtml(ctx.sectionTitle) + '</span>' +
-        '</div>' +
-        '<div class="mermaid-error-reason">' + escapeHtml(reason || 'Mermaid reported a syntax error.') + '</div>' +
-        '<details class="mermaid-error-details">' +
-          '<summary>Show diagram source</summary>' +
-          '<pre class="mermaid-error-src">' + escapeHtml(code || '') + '</pre>' +
-        '</details>' +
+      '<div class="mermaid-error-title">Diagram could not be rendered</div>' +
+      '<div class="mermaid-error-meta">' +
+      '<strong>' + escapeHtml(ctx.chapterTitle) + '</strong> ' +
+      '<span class="mermaid-error-sub">in ' + escapeHtml(ctx.sectionTitle) + '</span>' +
+      '</div>' +
+      '<div class="mermaid-error-reason">' + escapeHtml(reason || 'Mermaid reported a syntax error.') + '</div>' +
+      '<details class="mermaid-error-details">' +
+      '<summary>Show diagram source</summary>' +
+      '<pre class="mermaid-error-src">' + escapeHtml(code || '') + '</pre>' +
+      '</details>' +
       '</div>';
   }
 
@@ -1138,7 +1372,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     // Quote subgraph titles with brackets: `subgraph id [Any -- text]` -> `subgraph id ["Any -- text"]`.
     code = code.replace(
       /(\bsubgraph\s+[A-Za-z_][\w.-]*\s*\[)([^"\]][^\]]*)(\])/g,
-      function(_, open, label, close) {
+      function (_, open, label, close) {
         if (!/--|\\n/.test(label)) return open + label + close;
         return open + '"' + label.replace(/"/g, '\\"') + '"' + close;
       }
@@ -1147,7 +1381,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     // Quote subgraph titles without an id: `subgraph Any -- text`.
     code = code.replace(
       /^(\s*subgraph\s+)([^\n\r"][^\n\r]*?)(\s*)$/gm,
-      function(match, open, label, tail) {
+      function (match, open, label, tail) {
         // Skip if it looks like just an id (no whitespace, no dashes) or already quoted.
         if (!/--|\\n|\s/.test(label)) return match;
         if (/^"/.test(label)) return match;
@@ -1160,7 +1394,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     // Quote unquoted edge-middle labels: `A -->|text -- with dashes| B`.
     code = code.replace(
       /(-->?|---?|-\.-|==>?|~~~?)\|([^|\n]*)\|/g,
-      function(match, arrow, label) {
+      function (match, arrow, label) {
         if (!/--|\\n/.test(label)) return match;
         if (/^"/.test(label.replace(/^\s+/, ''))) return match;
         return arrow + '|"' + label.replace(/"/g, '\\"') + '"|';
@@ -1202,7 +1436,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       var label = code.slice(start, end);
       var trimmed = label.replace(/^\s+|\s+$/g, '');
       var alreadyQuoted = (trimmed.charAt(0) === '"' && trimmed.charAt(trimmed.length - 1) === '"') ||
-                          (trimmed.charAt(0) === '`' && trimmed.charAt(trimmed.length - 1) === '`');
+        (trimmed.charAt(0) === '`' && trimmed.charAt(trimmed.length - 1) === '`');
       var risky = /--|\\n/.test(label);
       if (!alreadyQuoted && risky) {
         out += ident + openCh + '"' + label.replace(/"/g, '\\"') + '"' + closeCh;
@@ -1234,18 +1468,18 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     var uid = 'mmd-' + (++mermaidIdCounter);
     var cleanCode = sanitizeMermaidSource(code);
     function handleFailure(reason) {
-      try { console.warn('[MQ-ERR] ' + uid + ': ' + reason + '\n--- code ---\n' + cleanCode); } catch(e) {}
+      try { console.warn('[MQ-ERR] ' + uid + ': ' + reason + '\n--- code ---\n' + cleanCode); } catch (e) { }
       if (originalSrc && renderMermaidInkFallback(container, originalSrc)) return;
       renderMermaidErrorCard(container, cleanCode, reason);
     }
     try {
-      mermaid.render(uid, cleanCode).then(function(result) {
+      mermaid.render(uid, cleanCode).then(function (result) {
         if (isMermaidErrorSvg(result && result.svg)) {
           handleFailure('Mermaid v11 syntax error.');
           return;
         }
         container.innerHTML = result.svg;
-      }).catch(function(err) {
+      }).catch(function (err) {
         handleFailure((err && (err.message || err.str)) || 'Mermaid threw an error.');
       });
     } catch (e) {
@@ -1266,14 +1500,14 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     var pending = [];
     var codeBlocks = md.querySelectorAll('pre code.language-mermaid, pre code.lang-mermaid');
-    codeBlocks.forEach(function(code) {
+    codeBlocks.forEach(function (code) {
       var pre = code.closest('pre');
       if (!pre) return;
       pending.push({ sourceEl: pre, code: code.textContent || '', originalSrc: null });
     });
 
     var imgs = md.querySelectorAll('img[src*="mermaid.ink"]');
-    imgs.forEach(function(img) {
+    imgs.forEach(function (img) {
       var src = img.getAttribute('src') || '';
       var decoded = extractMermaidSourceFromMermaidInkUrl(src);
       // Even if we can't decode the source locally, capture the img so we can
@@ -1285,9 +1519,9 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (!pending.length) return;
 
     var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-    try { mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose', flowchart: { curve: 'basis' } }); } catch(e) {}
+    try { mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose', flowchart: { curve: 'basis' } }); } catch (e) { }
 
-    pending.forEach(function(item) {
+    pending.forEach(function (item) {
       var wrapper = h('div', { class: 'mermaid-wrapper' });
       var container = h('div', { class: 'mermaid-container' });
       if (item.code) container.setAttribute('data-mermaid-src', item.code);
@@ -1310,10 +1544,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     var wrappers = dom.contentArea.querySelectorAll('.mermaid-wrapper');
     if (!wrappers.length) return;
     var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-    try { mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose', flowchart: { curve: 'basis' } }); } catch(e) {}
+    try { mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose', flowchart: { curve: 'basis' } }); } catch (e) { }
 
-    setTimeout(function() {
-      wrappers.forEach(function(wrapper) {
+    setTimeout(function () {
+      wrappers.forEach(function (wrapper) {
         var oldContainer = wrapper.querySelector('.mermaid-container');
         if (!oldContainer) return;
         var code = oldContainer.getAttribute('data-mermaid-src');
@@ -1335,7 +1569,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   // ===================== IMAGE SKELETONS =====================
   function wrapTables() {
-    dom.contentArea.querySelectorAll('.md-content table').forEach(function(table) {
+    dom.contentArea.querySelectorAll('.md-content table').forEach(function (table) {
       if (table.parentNode.classList.contains('table-wrapper')) return;
       var wrapper = h('div', { class: 'table-wrapper' });
       table.parentNode.insertBefore(wrapper, table);
@@ -1414,27 +1648,29 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     var bookmarkBtn = h('button', {
       class: 'action-btn bookmark-btn' + (Store.isBookmarked(key) ? ' active' : ''),
       html: svg(Store.isBookmarked(key) ? 'starFill' : 'star', 16) + (Store.isBookmarked(key) ? ' Bookmarked' : ' Bookmark'),
-      on: { click: function() {
-        var section = CONTENT.find(function(s){ return s.id === sectionId; });
-        var chapter = section && section.chapters.find(function(c){ return c.id === chapterId; });
-        Store.toggleBookmark(key, chapter ? chapter.title : '', sectionId);
-        bookmarkBtn.classList.toggle('active');
-        bookmarkBtn.innerHTML = svg(Store.isBookmarked(key) ? 'starFill' : 'star', 16) + (Store.isBookmarked(key) ? ' Bookmarked' : ' Bookmark');
-        buildNavigation();
-        setActiveNav(sectionId, chapterId);
-      }}
+      on: {
+        click: function () {
+          var section = CONTENT.find(function (s) { return s.id === sectionId; });
+          var chapter = section && section.chapters.find(function (c) { return c.id === chapterId; });
+          Store.toggleBookmark(key, chapter ? chapter.title : '', sectionId);
+          bookmarkBtn.classList.toggle('active');
+          bookmarkBtn.innerHTML = svg(Store.isBookmarked(key) ? 'starFill' : 'star', 16) + (Store.isBookmarked(key) ? ' Bookmarked' : ' Bookmark');
+          buildNavigation();
+          setActiveNav(sectionId, chapterId);
+        }
+      }
     });
 
     var playlistBtn = h('button', {
       class: 'action-btn',
       html: svg('playlist', 16) + ' Add to Playlist',
-      on: { click: function() { showAddToPlaylist(sectionId, chapterId); } }
+      on: { click: function () { showAddToPlaylist(sectionId, chapterId); } }
     });
 
     var notesBtn = h('button', {
       class: 'action-btn',
       html: svg('note', 16) + ' Notes',
-      on: { click: function() { toggleNotesPanel(sectionId, chapterId); } }
+      on: { click: function () { toggleNotesPanel(sectionId, chapterId); } }
     });
 
     toolbar.appendChild(bookmarkBtn);
@@ -1454,12 +1690,12 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     textarea.value = saved;
     var status = h('div', { class: 'notes-status', text: saved ? 'Notes loaded' : 'No notes yet' });
     var saveTimer;
-    textarea.addEventListener('input', function() {
+    textarea.addEventListener('input', function () {
       clearTimeout(saveTimer);
-      saveTimer = setTimeout(function() {
+      saveTimer = setTimeout(function () {
         Store.setNotes(key, textarea.value);
         status.textContent = 'Saved';
-        setTimeout(function(){ status.textContent = ''; }, 1500);
+        setTimeout(function () { status.textContent = ''; }, 1500);
       }, 500);
     });
     panel.appendChild(h('div', { class: 'notes-header', html: '<strong>\uD83D\uDCDD Personal Notes</strong>' }));
@@ -1475,29 +1711,33 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function showAddToPlaylist(sectionId, chapterId) {
     var playlists = Store.getPlaylists();
     var key = chKey(sectionId, chapterId);
-    var section = CONTENT.find(function(s){ return s.id === sectionId; });
-    var chapter = section && section.chapters.find(function(c){ return c.id === chapterId; });
+    var section = CONTENT.find(function (s) { return s.id === sectionId; });
+    var chapter = section && section.chapters.find(function (c) { return c.id === chapterId; });
     var title = chapter ? chapter.title : chapterId;
 
-    var modal = h('div', { class: 'modal-backdrop', on: { click: function(e) { if (e.target === modal) modal.remove(); } } });
+    var modal = h('div', { class: 'modal-backdrop', on: { click: function (e) { if (e.target === modal) modal.remove(); } } });
     var box = h('div', { class: 'modal-box' });
     box.appendChild(h('h3', { text: 'Add to Playlist' }));
     box.appendChild(h('p', { class: 'modal-subtitle', text: title }));
 
     if (playlists.length) {
-      playlists.forEach(function(pl, idx) {
+      playlists.forEach(function (pl, idx) {
         if (pl.deleted) return;
-        var inPl = pl.items.some(function(it){ return it.k === key; });
-        var row = h('div', { class: 'playlist-row' + (inPl ? ' in-playlist' : ''), on: { click: function() {
-          if (inPl) {
-            pl.items = pl.items.filter(function(it){ return it.k !== key; });
-          } else {
-            pl.items.push({ k: key, s: sectionId, c: chapterId, title: title });
+        var inPl = pl.items.some(function (it) { return it.k === key; });
+        var row = h('div', {
+          class: 'playlist-row' + (inPl ? ' in-playlist' : ''), on: {
+            click: function () {
+              if (inPl) {
+                pl.items = pl.items.filter(function (it) { return it.k !== key; });
+              } else {
+                pl.items.push({ k: key, s: sectionId, c: chapterId, title: title });
+              }
+              pl.t = Date.now();
+              Store.savePlaylists(playlists);
+              modal.remove();
+            }
           }
-          pl.t = Date.now();
-          Store.savePlaylists(playlists);
-          modal.remove();
-        }}});
+        });
         row.appendChild(h('span', { text: pl.name + ' (' + pl.items.length + ')' }));
         row.appendChild(h('span', { class: 'playlist-toggle', text: inPl ? '\u2713 Remove' : '+ Add' }));
         box.appendChild(row);
@@ -1506,14 +1746,18 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     var newRow = h('div', { class: 'playlist-new' });
     var inp = h('input', { type: 'text', class: 'playlist-input', 'placeholder': 'New playlist name\u2026' });
-    var addBtn = h('button', { class: 'playlist-add-btn', text: 'Create', on: { click: function() {
-      var name = inp.value.trim();
-      if (!name) return;
-      var newId = 'pl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
-      playlists.push({ id: newId, name: name, items: [{ k: key, s: sectionId, c: chapterId, title: title }], created: Date.now(), t: Date.now() });
-      Store.savePlaylists(playlists);
-      modal.remove();
-    }}});
+    var addBtn = h('button', {
+      class: 'playlist-add-btn', text: 'Create', on: {
+        click: function () {
+          var name = inp.value.trim();
+          if (!name) return;
+          var newId = 'pl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+          playlists.push({ id: newId, name: name, items: [{ k: key, s: sectionId, c: chapterId, title: title }], created: Date.now(), t: Date.now() });
+          Store.savePlaylists(playlists);
+          modal.remove();
+        }
+      }
+    });
     newRow.appendChild(inp);
     newRow.appendChild(addBtn);
     box.appendChild(newRow);
@@ -1528,7 +1772,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     var panel = document.getElementById(id);
     var overlay = document.getElementById('panel-overlay');
     if (!panel || !overlay) return;
-    document.querySelectorAll('.slide-panel.open').forEach(function(p){ p.classList.remove('open'); });
+    document.querySelectorAll('.slide-panel.open').forEach(function (p) { p.classList.remove('open'); });
     panel.classList.add('open');
     overlay.classList.add('active');
 
@@ -1537,7 +1781,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function closePanel() {
-    document.querySelectorAll('.slide-panel.open').forEach(function(p){ p.classList.remove('open'); });
+    document.querySelectorAll('.slide-panel.open').forEach(function (p) { p.classList.remove('open'); });
     var overlay = document.getElementById('panel-overlay');
     if (overlay) overlay.classList.remove('active');
   }
@@ -1547,16 +1791,20 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (!body) return;
     body.innerHTML = '';
     var bookmarks = Store.getBookmarks();
-    var keys = Object.keys(bookmarks).sort(function(a,b){ return (bookmarks[b].t || 0) - (bookmarks[a].t || 0); });
+    var keys = Object.keys(bookmarks).sort(function (a, b) { return (bookmarks[b].t || 0) - (bookmarks[a].t || 0); });
     if (!keys.length) { body.innerHTML = '<div class="panel-empty">No bookmarks yet. Star chapters to save them here.</div>'; return; }
-    keys.forEach(function(key) {
+    keys.forEach(function (key) {
       var bm = bookmarks[key];
       var parts = key.split('/');
       var sid = parts[0], cid = parts.slice(1).join('/');
-      var item = h('div', { class: 'panel-item', on: { click: function() {
-        loadChapter(sid, cid);
-        closePanel();
-      }}});
+      var item = h('div', {
+        class: 'panel-item', on: {
+          click: function () {
+            loadChapter(sid, cid);
+            closePanel();
+          }
+        }
+      });
       item.appendChild(h('div', { class: 'panel-item-title', text: bm.title || cid }));
       var domain = getDomain(sid);
       item.appendChild(h('div', { class: 'panel-item-meta', text: domain ? domain.icon + ' ' + domain.label : sid }));
@@ -1572,49 +1820,65 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     var newRow = h('div', { class: 'panel-new-row' });
     var inp = h('input', { type: 'text', class: 'playlist-input', 'placeholder': 'New playlist\u2026' });
-    var addBtn = h('button', { class: 'playlist-add-btn', text: 'Create', on: { click: function() {
-      var name = inp.value.trim();
-      if (!name) return;
-      var newId = 'pl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
-      playlists.push({ id: newId, name: name, items: [], created: Date.now(), t: Date.now() });
-      Store.savePlaylists(playlists);
-      renderPlaylistsPanel();
-    }}});
+    var addBtn = h('button', {
+      class: 'playlist-add-btn', text: 'Create', on: {
+        click: function () {
+          var name = inp.value.trim();
+          if (!name) return;
+          var newId = 'pl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+          playlists.push({ id: newId, name: name, items: [], created: Date.now(), t: Date.now() });
+          Store.savePlaylists(playlists);
+          renderPlaylistsPanel();
+        }
+      }
+    });
     newRow.appendChild(inp);
     newRow.appendChild(addBtn);
     body.appendChild(newRow);
 
-    var activePlaylists = playlists.filter(function(pl) { return !pl.deleted; });
+    var activePlaylists = playlists.filter(function (pl) { return !pl.deleted; });
     if (!activePlaylists.length) { body.appendChild(h('div', { class: 'panel-empty', text: 'No playlists yet. Create one to organize your study.' })); return; }
 
-    activePlaylists.forEach(function(pl, plIdx) {
+    activePlaylists.forEach(function (pl, plIdx) {
       var plDiv = h('div', { class: 'playlist-section' });
       var plHeader = h('div', { class: 'playlist-header' });
       plHeader.appendChild(h('strong', { text: pl.name + ' (' + pl.items.length + ')' }));
-      var delBtn = h('button', { class: 'playlist-del', text: '\u00D7', title: 'Delete playlist', on: { click: function(e) {
-        e.stopPropagation();
-        pl.deleted = true;
-        pl.t = Date.now();
-        Store.savePlaylists(playlists);
-        renderPlaylistsPanel();
-      }}});
+      var delBtn = h('button', {
+        class: 'playlist-del', text: '\u00D7', title: 'Delete playlist', on: {
+          click: function (e) {
+            e.stopPropagation();
+            pl.deleted = true;
+            pl.t = Date.now();
+            Store.savePlaylists(playlists);
+            renderPlaylistsPanel();
+          }
+        }
+      });
       plHeader.appendChild(delBtn);
       plDiv.appendChild(plHeader);
 
-      pl.items.forEach(function(it, itIdx) {
-        var row = h('div', { class: 'panel-item', on: { click: function() {
-          loadChapter(it.s, it.c);
-          closePanel();
-        }}});
+      pl.items.forEach(function (it, itIdx) {
+        var row = h('div', {
+          class: 'panel-item', on: {
+            click: function () {
+              loadChapter(it.s, it.c);
+              closePanel();
+            }
+          }
+        });
         row.appendChild(h('span', { class: 'playlist-idx', text: (itIdx + 1) + '.' }));
         row.appendChild(h('span', { class: 'panel-item-title', text: it.title }));
-        var removeBtn = h('button', { class: 'playlist-remove', text: '\u00D7', on: { click: function(e) {
-          e.stopPropagation();
-          pl.items.splice(itIdx, 1);
-          pl.t = Date.now();
-          Store.savePlaylists(playlists);
-          renderPlaylistsPanel();
-        }}});
+        var removeBtn = h('button', {
+          class: 'playlist-remove', text: '\u00D7', on: {
+            click: function (e) {
+              e.stopPropagation();
+              pl.items.splice(itIdx, 1);
+              pl.t = Date.now();
+              Store.savePlaylists(playlists);
+              renderPlaylistsPanel();
+            }
+          }
+        });
         row.appendChild(removeBtn);
         plDiv.appendChild(row);
       });
@@ -1638,7 +1902,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     }
 
     if (domain && !state.loadedDomains[domain.prefix]) {
-      loadDomainContent(domain.prefix, function() { doLoadChapter(sectionId, chapterId, opts); });
+      loadDomainContent(domain.prefix, function () { doLoadChapter(sectionId, chapterId, opts); });
       return;
     }
     doLoadChapter(sectionId, chapterId, opts);
@@ -1752,7 +2016,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (isFileProtocol()) {
       var fileErr = new Error('Fetch blocked on file:// protocol');
       fileErr.code = 'FILE_PROTOCOL';
-      try { console.warn('[Tech Primer] ' + fileErr.message + ' (open via a local HTTP server to load ' + url + ')'); } catch (e) {}
+      try { console.warn('[Tech Primer] ' + fileErr.message + ' (open via a local HTTP server to load ' + url + ')'); } catch (e) { }
       cb(fileErr);
       return;
     }
@@ -1764,13 +2028,13 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         var e = markdownFileCache[url];
         e.text = text; e.pending = false;
         var cbs = e.callbacks; e.callbacks = [];
-        cbs.forEach(function (fn) { try { fn(null, text); } catch (err) {} });
+        cbs.forEach(function (fn) { try { fn(null, text); } catch (err) { } });
       })
       .catch(function (err) {
         var e = markdownFileCache[url];
         delete markdownFileCache[url];
         var cbs = (e && e.callbacks) || [];
-        cbs.forEach(function (fn) { try { fn(err); } catch (e2) {} });
+        cbs.forEach(function (fn) { try { fn(err); } catch (e2) { } });
       });
   }
 
@@ -1838,22 +2102,22 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     var html =
       '<div class="chapter-error-card">' +
-        '<div class="chapter-error-icon">\u26A0\uFE0F</div>' +
-        '<div class="chapter-error-title">' + escapeHtml(info.title) + '</div>' +
-        '<div class="chapter-error-detail">' + escapeHtml(info.detail) + '</div>' +
-        (isFile
-          ? ('<div class="chapter-error-cmdline">' +
-               '<code id="chapter-error-cmd">' + escapeHtml(serverCmd) + '</code>' +
-               '<button type="button" class="chapter-error-copy" data-copy="' + escapeHtml(serverCmd) + '">Copy</button>' +
-             '</div>')
-          : '') +
-        (info.hint ? '<div class="chapter-error-hint">' + hintHtml + '</div>' : '') +
-        '<div class="chapter-error-actions">' +
-          '<button type="button" class="chapter-error-retry">Retry</button>' +
-        '</div>' +
-        '<details class="chapter-error-raw"><summary>Technical details</summary>' +
-          '<pre>' + escapeHtml(info.raw || '') + '</pre>' +
-        '</details>' +
+      '<div class="chapter-error-icon">\u26A0\uFE0F</div>' +
+      '<div class="chapter-error-title">' + escapeHtml(info.title) + '</div>' +
+      '<div class="chapter-error-detail">' + escapeHtml(info.detail) + '</div>' +
+      (isFile
+        ? ('<div class="chapter-error-cmdline">' +
+          '<code id="chapter-error-cmd">' + escapeHtml(serverCmd) + '</code>' +
+          '<button type="button" class="chapter-error-copy" data-copy="' + escapeHtml(serverCmd) + '">Copy</button>' +
+          '</div>')
+        : '') +
+      (info.hint ? '<div class="chapter-error-hint">' + hintHtml + '</div>' : '') +
+      '<div class="chapter-error-actions">' +
+      '<button type="button" class="chapter-error-retry">Retry</button>' +
+      '</div>' +
+      '<details class="chapter-error-raw"><summary>Technical details</summary>' +
+      '<pre>' + escapeHtml(info.raw || '') + '</pre>' +
+      '</details>' +
       '</div>';
 
     dom.contentArea.innerHTML = '';
@@ -1922,7 +2186,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         renderChapterLoading();
         fetchChapterMarkdown(chapter, function (err) {
           if (err) {
-            try { err.url = chapter.contentFile || chapter.contentVar; } catch (e) {}
+            try { err.url = chapter.contentFile || chapter.contentVar; } catch (e) { }
             if (state.activeSection === sectionId && state.activeChapter === chapterId) {
               renderChapterError(err, function () {
                 if (chapter.contentFile) delete markdownFileCache[chapter.contentFile];
@@ -1969,6 +2233,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     glassWrap.appendChild(chapterHeader);
     glassWrap.appendChild(renderChapterActions(sectionId, chapterId));
     glassWrap.appendChild(mdDiv);
+
     dom.contentArea.innerHTML = '';
     dom.contentArea.appendChild(glassWrap);
 
@@ -1980,6 +2245,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     wrapTables();
     renderMermaidDiagrams();
     wrapImageSkeletons();
+    renderChapterMindMap(sectionId, chapter);
     addChapterNav(sectionId, chapterId);
     buildChapterToc();
     observeContent();
@@ -2007,10 +2273,12 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       dom.chapterTocNav.appendChild(h('a', {
         class: 'toc-link', text: heading.textContent,
         data: { target: id, level: heading.tagName[1] },
-        on: { click: function () {
-          var t = document.getElementById(id);
-          if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - getHeaderClearance(), behavior: 'smooth' });
-        }}
+        on: {
+          click: function () {
+            var t = document.getElementById(id);
+            if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - getHeaderClearance(), behavior: 'smooth' });
+          }
+        }
       }));
     });
     dom.chapterToc.classList.add('visible');
@@ -2103,7 +2371,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     var matches = [];
     if (state.fuseInstance) {
       var results = state.fuseInstance.search(query, { limit: 20 });
-      results.forEach(function(r) {
+      results.forEach(function (r) {
         matches.push({
           sectionId: r.item.sectionId,
           sectionTitle: r.item.sectionTitle,
@@ -2153,14 +2421,17 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       var preview = findMatchContext(m.chapter.content || '', terms, 140);
       var item = h('div', {
         class: 'search-result-item',
-        on: { click: function () {
-          loadChapter(m.sectionId, m.chapter.id);
-          dom.searchResults.classList.remove('active');
-          syncSearchBlur(false);
-          dom.searchInput.value = '';
-          if (dom.searchInputMobile) dom.searchInputMobile.value = '';
-          closeSidebar();
-        }}
+        on: {
+          click: function () {
+            loadChapter(m.sectionId, m.chapter.id);
+            dom.searchResults.classList.remove('active');
+            syncSearchBlur(false);
+            dom.searchInput.value = '';
+            if (dom.searchInputMobile) dom.searchInputMobile.value = '';
+            closeSidebar();
+            closePanel();
+          }
+        }
       }, [
         h('div', { class: 'search-result-title', html: highlightTerms(m.chapter.title, terms) }),
         h('div', { class: 'search-result-section', html: m.sectionTitle + domainTag }),
@@ -2174,8 +2445,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   // ===================== 3D CARD TILT =====================
   function initCardTilt() {
-    document.querySelectorAll('.welcome-domain').forEach(function(card) {
-      card.addEventListener('mousemove', function(e) {
+    document.querySelectorAll('.welcome-domain').forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
         card.classList.remove('tilt-reset');
         var rect = card.getBoundingClientRect();
         var x = e.clientX - rect.left;
@@ -2187,11 +2458,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         card.style.transform = 'perspective(800px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateZ(8px) scale(1.03)';
         card.style.boxShadow = '0 ' + Math.round(20 + Math.abs(rotX)) + 'px ' + Math.round(40 + Math.abs(rotY)) + 'px rgba(0,0,0,0.18)';
       });
-      card.addEventListener('mouseleave', function() {
+      card.addEventListener('mouseleave', function () {
         card.classList.add('tilt-reset');
         card.style.transform = '';
         card.style.boxShadow = '';
-        setTimeout(function() { card.classList.remove('tilt-reset'); }, 700);
+        setTimeout(function () { card.classList.remove('tilt-reset'); }, 700);
       });
     });
   }
@@ -2208,13 +2479,13 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
      * knows whether there's any DOM to clean up. */
     if (window.AetherBg && window.AetherBg.isActive && window.AetherBg.isActive()) {
       var theme = document.documentElement.getAttribute('data-theme') || 'light';
-      try { window.AetherBg.setTheme(theme); } catch(e) {}
+      try { window.AetherBg.setTheme(theme); } catch (e) { }
       parallaxState = { aether: true };
       return;
     }
     if (window.AetherBg && window.AetherBg.init && window.AetherBg.init()) {
       var theme2 = document.documentElement.getAttribute('data-theme') || 'light';
-      try { window.AetherBg.setTheme(theme2); } catch(e) {}
+      try { window.AetherBg.setTheme(theme2); } catch (e) { }
       parallaxState = { aether: true };
       return;
     }
@@ -2222,11 +2493,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     /* Graceful fallback: the original CSS parallax blobs. Used when WebGL is
      * blocked or the import fails. Identical behaviour to the pre-3D site. */
     var shapes = [
-      { size: 300, x: '8%',  y: 80,  speed: 0.3,  color: 'var(--accent)' },
-      { size: 180, x: '78%', y: 180, speed: 0.5,  color: 'var(--domain-ms)' },
-      { size: 220, x: '55%', y: 420, speed: 0.2,  color: 'var(--domain-mq)' },
-      { size: 140, x: '18%', y: 520, speed: 0.4,  color: 'var(--domain-sd)' },
-      { size: 260, x: '88%', y: 60,  speed: 0.15, color: 'var(--accent)' },
+      { size: 300, x: '8%', y: 80, speed: 0.3, color: 'var(--accent)' },
+      { size: 180, x: '78%', y: 180, speed: 0.5, color: 'var(--domain-ms)' },
+      { size: 220, x: '55%', y: 420, speed: 0.2, color: 'var(--domain-mq)' },
+      { size: 140, x: '18%', y: 520, speed: 0.4, color: 'var(--domain-sd)' },
+      { size: 260, x: '88%', y: 60, speed: 0.15, color: 'var(--accent)' },
       { size: 160, x: '34%', y: 260, speed: 0.25, color: 'var(--domain-dp)' }
     ];
     var container = document.createElement('div');
@@ -2235,17 +2506,17 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     var shapeOpacity = isDark ? 0.06 : 0.14;
     var els = [];
-    shapes.forEach(function(s) {
+    shapes.forEach(function (s) {
       var el = document.createElement('div');
       el.style.cssText = 'position:absolute;border-radius:50%;width:' + s.size + 'px;height:' + s.size + 'px;left:' + s.x + ';top:' + s.y + 'px;background:' + s.color + ';opacity:' + shapeOpacity + ';will-change:transform;filter:blur(60px);';
       container.appendChild(el);
       els.push({ el: el, speed: s.speed });
     });
     document.body.appendChild(container);
-    requestAnimationFrame(function() { container.style.opacity = '1'; });
-    var handler = function() {
+    requestAnimationFrame(function () { container.style.opacity = '1'; });
+    var handler = function () {
       var scrollY = window.scrollY;
-      els.forEach(function(item) { item.el.style.transform = 'translateY(' + (-scrollY * item.speed) + 'px)'; });
+      els.forEach(function (item) { item.el.style.transform = 'translateY(' + (-scrollY * item.speed) + 'px)'; });
     };
     window.addEventListener('scroll', handler, { passive: true });
     parallaxState = { container: container, handler: handler };
@@ -2255,7 +2526,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     /* Always tear down the welcome 3D scene when leaving the welcome page —
      * keeps the GPU idle while the user reads chapters. */
     if (window.AetherWelcome && window.AetherWelcome.isActive && window.AetherWelcome.isActive()) {
-      try { window.AetherWelcome.dispose(); } catch(e) {}
+      try { window.AetherWelcome.dispose(); } catch (e) { }
     }
 
     if (!parallaxState) return;
@@ -2268,8 +2539,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function initRippleEffect() {
-    document.querySelectorAll('.welcome-domain').forEach(function(card) {
-      card.addEventListener('mousedown', function(e) {
+    document.querySelectorAll('.welcome-domain').forEach(function (card) {
+      card.addEventListener('mousedown', function (e) {
         var rect = card.getBoundingClientRect();
         var ripple = document.createElement('div');
         ripple.className = 'ripple-effect';
@@ -2279,7 +2550,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
         ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
         card.appendChild(ripple);
-        ripple.addEventListener('animationend', function() { ripple.remove(); });
+        ripple.addEventListener('animationend', function () { ripple.remove(); });
       });
     });
   }
@@ -2287,9 +2558,9 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function initMagneticNav() {
     var sidebar = dom.sidebar;
     if (!sidebar) return;
-    sidebar.addEventListener('mousemove', function(e) {
+    sidebar.addEventListener('mousemove', function (e) {
       var items = sidebar.querySelectorAll('.nav-item:not(.active)');
-      items.forEach(function(item) {
+      items.forEach(function (item) {
         var rect = item.getBoundingClientRect();
         var cy = rect.top + rect.height / 2;
         var dist = Math.abs(e.clientY - cy);
@@ -2302,8 +2573,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         }
       });
     });
-    sidebar.addEventListener('mouseleave', function() {
-      sidebar.querySelectorAll('.nav-item').forEach(function(item) { item.style.removeProperty('--mag-x'); });
+    sidebar.addEventListener('mouseleave', function () {
+      sidebar.querySelectorAll('.nav-item').forEach(function (item) { item.style.removeProperty('--mag-x'); });
     });
   }
 
@@ -2326,7 +2597,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     function onDomainClick(prefix) {
       state.activeDomainFilter = prefix;
       updateSearchPlaceholder();
-      loadDomainContent(prefix, function() {
+      loadDomainContent(prefix, function () {
         buildNavigation();
         var firstSec = CONTENT.find(function (s) { return s.id.indexOf(prefix) === 0; });
         if (firstSec && firstSec.chapters.length && firstSec.chapters[0].content) {
@@ -2342,7 +2613,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     function makeDomainCard(d) {
       var secs = CONTENT.filter(function (s) { return s.id.indexOf(d.prefix) === 0; });
-      var chCount = secs.reduce(function(a,s){ return a + s.chapters.length; }, 0);
+      var chCount = secs.reduce(function (a, s) { return a + s.chapters.length; }, 0);
       return h('div', { class: 'welcome-domain', data: { domain: d.prefix }, on: { click: function () { onDomainClick(d.prefix); } } }, [
         h('div', { class: 'welcome-domain-icon', text: d.icon }),
         h('h3', { text: d.label }),
@@ -2393,7 +2664,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       ]);
     }
 
-    var totalChapters = CONTENT.reduce(function(a,s){ return a + s.chapters.length; }, 0);
+    var totalChapters = CONTENT.reduce(function (a, s) { return a + s.chapters.length; }, 0);
 
     /* Stage element for the 3D welcome scene — mounted into below. The class
      * `welcome-3d-active` is added by AetherWelcome.mount() on success, which
@@ -2430,19 +2701,23 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
           size: 320,
           onDomainClick: onDomainClick,
         });
-      } catch(e) { /* fall through — emoji icon stays visible */ }
+      } catch (e) { /* fall through — emoji icon stays visible */ }
     }
 
     var lastRead = Store.getLastRead();
     if (lastRead) {
-      var lrSection = CONTENT.find(function(s){ return s.id === lastRead.s; });
-      var lrChapter = lrSection && lrSection.chapters.find(function(c){ return c.id === lastRead.c; });
+      var lrSection = CONTENT.find(function (s) { return s.id === lastRead.s; });
+      var lrChapter = lrSection && lrSection.chapters.find(function (c) { return c.id === lastRead.c; });
       if (lrChapter) {
-        var resumeBanner = h('div', { class: 'resume-banner', on: { click: function() {
-          var d = getDomain(lastRead.s);
-          if (d) { state.activeDomainFilter = d.prefix; updateSearchPlaceholder(); buildNavigation(); }
-          loadChapter(lastRead.s, lastRead.c);
-        }}});
+        var resumeBanner = h('div', {
+          class: 'resume-banner', on: {
+            click: function () {
+              var d = getDomain(lastRead.s);
+              if (d) { state.activeDomainFilter = d.prefix; updateSearchPlaceholder(); buildNavigation(); }
+              loadChapter(lastRead.s, lastRead.c);
+            }
+          }
+        });
         resumeBanner.appendChild(h('div', { class: 'resume-text', html: '<strong>Continue reading:</strong> ' + lrChapter.title }));
         resumeBanner.appendChild(h('div', { class: 'resume-arrow', html: '\u2192' }));
         dom.contentArea.appendChild(resumeBanner);
@@ -2515,35 +2790,35 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (!('serviceWorker' in navigator)) return;
     try {
       navigator.serviceWorker.getRegistrations().then(function (regs) {
-        regs.forEach(function (reg) { try { reg.unregister(); } catch (_) {} });
-      }).catch(function () {});
-    } catch (_) {}
+        regs.forEach(function (reg) { try { reg.unregister(); } catch (_) { } });
+      }).catch(function () { });
+    } catch (_) { }
     try {
       if (typeof caches !== 'undefined' && caches.keys) {
         caches.keys().then(function (names) {
-          names.forEach(function (n) { try { caches.delete(n); } catch (_) {} });
-        }).catch(function () {});
+          names.forEach(function (n) { try { caches.delete(n); } catch (_) { } });
+        }).catch(function () { });
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // ===================== INIT =====================
   function init() {
-    dom.contentArea       = document.getElementById('content-area');
-    dom.sidebarNav        = document.getElementById('sidebar-nav');
-    dom.searchInput       = document.getElementById('search-input');
+    dom.contentArea = document.getElementById('content-area');
+    dom.sidebarNav = document.getElementById('sidebar-nav');
+    dom.searchInput = document.getElementById('search-input');
     dom.searchInputMobile = document.getElementById('search-input-mobile');
-    dom.searchResults     = document.getElementById('search-results');
-    dom.progressBar       = document.getElementById('progress-bar');
-    dom.backToTop         = document.getElementById('back-to-top');
-    dom.sidebar           = document.getElementById('sidebar');
-    dom.overlay           = document.getElementById('sidebar-overlay');
-    dom.menuToggle        = document.getElementById('menu-toggle');
-    dom.themeToggle       = document.getElementById('theme-toggle');
-    dom.chapterToc        = document.getElementById('chapter-toc');
-    dom.chapterTocNav     = document.getElementById('chapter-toc-nav');
-    dom.sidebarToggle     = document.getElementById('sidebar-toggle');
-    dom.guideMain         = document.querySelector('.guide-main');
+    dom.searchResults = document.getElementById('search-results');
+    dom.progressBar = document.getElementById('progress-bar');
+    dom.backToTop = document.getElementById('back-to-top');
+    dom.sidebar = document.getElementById('sidebar');
+    dom.overlay = document.getElementById('sidebar-overlay');
+    dom.menuToggle = document.getElementById('menu-toggle');
+    dom.themeToggle = document.getElementById('theme-toggle');
+    dom.chapterToc = document.getElementById('chapter-toc');
+    dom.chapterTocNav = document.getElementById('chapter-toc-nav');
+    dom.sidebarToggle = document.getElementById('sidebar-toggle');
+    dom.guideMain = document.querySelector('.guide-main');
 
     configureMarked();
     initTheme();
@@ -2567,10 +2842,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       idle(function () { navRebuildScheduled = false; buildNavigation(); });
     }
 
-    ensureAllContentLoaded(function() {
+    ensureAllContentLoaded(function () {
       scheduleNavRebuild();
       initFuse();
-      prefetchExternalChapters(function() {
+      prefetchExternalChapters(function () {
         scheduleNavRebuild();
         initFuse();
       });
@@ -2622,20 +2897,21 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); dom.searchInput.focus(); }
       if (e.key === 'Escape') {
         dom.searchResults.classList.remove('active'); syncSearchBlur(false); dom.searchInput.blur(); closeSidebar(); closePanel();
+        if (typeof closeMindMapModal === 'function') closeMindMapModal();
         var dd = document.getElementById('prefs-dropdown'); if (dd) dd.classList.remove('active');
         var ad = document.getElementById('account-dropdown'); if (ad) ad.classList.remove('active');
       }
     });
 
-    document.getElementById('btn-bookmarks').addEventListener('click', function() { openPanel('panel-bookmarks'); });
-    document.getElementById('btn-playlists').addEventListener('click', function() { openPanel('panel-playlists'); });
-    document.getElementById('btn-preferences').addEventListener('click', function() {
+    document.getElementById('btn-bookmarks').addEventListener('click', function () { openPanel('panel-bookmarks'); });
+    document.getElementById('btn-playlists').addEventListener('click', function () { openPanel('panel-playlists'); });
+    document.getElementById('btn-preferences').addEventListener('click', function () {
       var dd = document.getElementById('prefs-dropdown');
       if (dd) dd.classList.toggle('active');
     });
 
     document.getElementById('panel-overlay').addEventListener('click', closePanel);
-    document.querySelectorAll('.panel-close').forEach(function(btn) {
+    document.querySelectorAll('.panel-close').forEach(function (btn) {
       btn.addEventListener('click', closePanel);
     });
 
@@ -2655,7 +2931,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   function renderAccountUi() {
     var btn = document.getElementById('btn-account');
-    var dd  = document.getElementById('account-dropdown');
+    var dd = document.getElementById('account-dropdown');
     if (!btn || !dd) return;
     var u = Auth.user;
     if (u) {
@@ -2735,8 +3011,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   function initAccountUi() {
     var btn = document.getElementById('btn-account');
-    var dd  = document.getElementById('account-dropdown');
-    var so  = document.getElementById('btn-signout');
+    var dd = document.getElementById('account-dropdown');
+    var so = document.getElementById('btn-signout');
     if (!btn || !dd || !so) return;
 
     btn.addEventListener('click', function () {
