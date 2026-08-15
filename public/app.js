@@ -2780,28 +2780,6 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     return false;
   }
 
-  // ===================== SERVICE WORKER =====================
-  // We intentionally no longer register a caching service worker: offline
-  // support was trading too much for cache-invalidation pain (stale app.js
-  // kept Mermaid diagrams broken after fixes landed). If any existing client
-  // still has an SW controlling this page, we actively unregister it and
-  // wipe its caches so the next reload is a clean slate.
-  function registerSW() {
-    if (!('serviceWorker' in navigator)) return;
-    try {
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        regs.forEach(function (reg) { try { reg.unregister(); } catch (_) { } });
-      }).catch(function () { });
-    } catch (_) { }
-    try {
-      if (typeof caches !== 'undefined' && caches.keys) {
-        caches.keys().then(function (names) {
-          names.forEach(function (n) { try { caches.delete(n); } catch (_) { } });
-        }).catch(function () { });
-      }
-    } catch (_) { }
-  }
-
   // ===================== INIT =====================
   function init() {
     dom.contentArea = document.getElementById('content-area');
@@ -2917,7 +2895,6 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     initAccountUi();
 
-    registerSW();
     initMagneticNav();
   }
 

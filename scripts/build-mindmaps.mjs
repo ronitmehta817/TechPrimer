@@ -719,7 +719,6 @@ function build() {
   const body =
 `window.AllWebMindMapData = {
   checksum: ${JSON.stringify(checksum)},
-  generatedAt: ${JSON.stringify(new Date().toISOString())},
   chapters: ${JSON.stringify(chapters, null, 2)}
 };
 `;

@@ -31,7 +31,6 @@
  */
 window.AllWebMindMapData = {
   checksum: "54c32887",
-  generatedAt: "2026-05-14T21:54:53.180Z",
   chapters: {
   "sd-foundations/01-what-is-system-design": {
     "title": "What Is System Design?",

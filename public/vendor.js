@@ -1,64 +1,93 @@
 (function () {
-  'use strict';
+  "use strict";
 
-  function addLink(attrs) {
-    var l = document.createElement('link');
-    Object.keys(attrs).forEach(function (k) {
-      if (attrs[k] === true) l.setAttribute(k, '');
-      else l.setAttribute(k, attrs[k]);
+  var assets = @@VENDOR_ASSETS_JSON@@;
+
+  function loadScript(asset) {
+    return new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[src="' + asset.url + '"]');
+      if (existing) {
+        if (existing.dataset.loaded === "true") {
+          resolve();
+          return;
+        }
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+        return;
+      }
+
+      var script = document.createElement("script");
+      script.src = asset.url;
+      script.integrity = asset.integrity;
+      script.crossOrigin = "anonymous";
+      script.async = false;
+      script.addEventListener("load", function () {
+        script.dataset.loaded = "true";
+        resolve();
+      }, { once: true });
+      script.addEventListener("error", function () {
+        reject(new Error("Unable to load " + asset.url));
+      }, { once: true });
+      document.head.appendChild(script);
     });
-    document.head.appendChild(l);
   }
 
-  function addScript(src) {
-    var s = document.createElement('script');
-    s.src = src;
-    s.async = false;
-    document.head.appendChild(s);
+  function addOptionalFonts() {
+    var preconnect = document.createElement("link");
+    preconnect.rel = "preconnect";
+    preconnect.href = "https://fonts.gstatic.com";
+    preconnect.crossOrigin = "anonymous";
+    document.head.appendChild(preconnect);
+
+    var stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href =
+      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap";
+    document.head.appendChild(stylesheet);
   }
 
-  function addInline(type, code) {
-    var s = document.createElement('script');
-    if (type) s.type = type;
-    s.textContent = code;
-    document.head.appendChild(s);
+  function assertGlobals() {
+    var required = ["marked", "hljs", "mermaid", "pako", "Fuse", "DOMPurify"];
+    var missing = required.filter(function (name) {
+      return typeof window[name] === "undefined";
+    });
+
+    if (missing.length > 0) {
+      throw new Error("Missing required libraries: " + missing.join(", "));
+    }
   }
 
-  addLink({ rel: 'preconnect', href: 'https://fonts.googleapis.com' });
-  addLink({ rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true });
+  var highlightLanguages = [
+    "python",
+    "java",
+    "javascript",
+    "bash",
+    "json",
+    "yaml",
+    "xml",
+    "sql",
+    "properties"
+  ];
 
-  addLink({
-    rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?'
-        + 'family=Inter:wght@300;400;500;600;700;800'
-        + '&family=JetBrains+Mono:wght@400;500;600'
-        + '&display=swap',
+  var highlightReady = loadScript(assets["highlight.js"]).then(function () {
+    return Promise.all(highlightLanguages.map(function (language) {
+      return loadScript(assets["highlight-languages/" + language + ".js"]);
+    }));
   });
 
-  addInline('importmap', JSON.stringify({
-    imports: {
-      three: 'https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.module.js',
-    },
-  }));
+  window.TP_VENDOR_READY = Promise.all([
+    loadScript(assets["marked.js"]),
+    loadScript(assets["mermaid.js"]),
+    loadScript(assets["pako.js"]),
+    loadScript(assets["fuse.js"]),
+    loadScript(assets["dompurify.js"]),
+    highlightReady
+  ]).then(function () {
+    assertGlobals();
+    return true;
+  });
 
-  var vendorScripts = [
-    'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/properties.min.js',
-    'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js',
-    'https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js',
-  ];
-  vendorScripts.forEach(addScript);
-
-  addInline('module',
-    'import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.mjs";'
-    + 'window.Fuse = Fuse;');
+  if (navigator.onLine) {
+    addOptionalFonts();
+  }
 })();

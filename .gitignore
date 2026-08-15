@@ -1,6 +1,8 @@
 .dev.vars
 .wrangler/
 node_modules/
+dist/
 .DS_Store
 *.md
 Skill/
+
