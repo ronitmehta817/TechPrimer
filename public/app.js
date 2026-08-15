@@ -872,10 +872,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         state.flatChapters.push({ sectionId: section.id, chapter: ch });
         var key = chKey(section.id, ch.id);
         var isBookmarked = !!bookmarks[key];
-        var navItem = h('div', {
+        var navItem = h('a', {
           class: 'nav-item',
-          data: { section: section.id, chapter: ch.id },
-          on: { click: function () { loadChapter(section.id, ch.id); closeSidebar(); } }
+          href: '?section=' + section.id + '&chapter=' + ch.id,
+          data: { section: section.id, chapter: ch.id, testid: 'chapter-link' },
+          on: { click: function (e) { e.preventDefault(); loadChapter(section.id, ch.id); closeSidebar(); } }
         }, [
           h('span', { class: 'nav-item-dot' }),
           h('span', { class: 'nav-item-title', text: ch.title }),
@@ -1448,10 +1449,16 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     return out;
   }
 
-  // Render a mermaid.ink <img> fallback that respects the current theme. Used
-  // when local Mermaid v11 can't parse the diagram (we still want it to show
-  // up in dark mode instead of a blank error card).
   function renderMermaidInkFallback(container, originalSrc) {
+    if (!navigator.onLine) {
+      var message = document.createElement("p");
+      message.className = "mermaid-error";
+      message.textContent = "Diagram unavailable offline. Reconnect to retry.";
+      container.innerHTML = '';
+      container.appendChild(message);
+      return true;
+    }
+
     if (!originalSrc) return false;
     var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
     var url = originalSrc.split('#')[0].split('?')[0];
@@ -2220,13 +2227,56 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       ? '<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;background:var(--accent-light);color:var(--accent);margin-right:8px;">' + domainObj.icon + ' ' + domainObj.label + '</span>'
       : '';
     var time = readingTime(chapter.content, chapter);
-    var badge = h('div', { class: 'reading-time-badge', html: domainBadge + svg('clock', 14) + ' ' + time + ' read' });
     var displayContent = stripMatchingLeadingHeading(chapter.content, chapter.title);
+    var MARKDOWN_POLICY = {
+      ALLOWED_TAGS: [
+        "a", "blockquote", "br", "code", "del", "div", "em", "h1", "h2",
+        "h3", "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre",
+        "span", "strong", "table", "tbody", "td", "th", "thead", "tr", "ul"
+      ],
+      ALLOWED_ATTR: [
+        "alt", "aria-label", "class", "data-mermaid-url", "href", "id",
+        "rel", "role", "src", "target", "title"
+      ],
+      ALLOW_DATA_ATTR: true
+    };
+
+    function escapeHtmlAttribute(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function replaceMermaidInkImages(markdown) {
+      var pattern = /!\[([^\]]*)\]\((https:\/\/mermaid\.ink\/img\/pako:[^)\s]+)\)/g;
+      return markdown.replace(pattern, function (_match, alt, sourceUrl) {
+        return [
+          '<div class="mermaid-local"',
+          ' data-mermaid-url="' + escapeHtmlAttribute(sourceUrl) + '"',
+          ' role="img"',
+          ' aria-label="' + escapeHtmlAttribute(alt || "Diagram") + '">',
+          "</div>"
+        ].join("");
+      });
+    }
+
+    function renderMarkdown(markdown) {
+      if (!window.marked || !window.DOMPurify) {
+        throw new Error("Markdown libraries are unavailable");
+      }
+
+      var localMarkdown = replaceMermaidInkImages(markdown);
+      var rawHtml = window.marked.parse(localMarkdown);
+      return window.DOMPurify.sanitize(rawHtml, MARKDOWN_POLICY);
+    }
+
     var chapterHeader = h('div', { class: 'chapter-header' }, [
       h('div', { class: 'chapter-section-label', text: section.title }),
       h('h1', { class: 'chapter-title', text: chapter.title })
     ]);
-    var mdDiv = h('div', { class: 'md-content', html: marked.parse(displayContent) });
+    var mdDiv = h('div', { class: 'md-content', html: renderMarkdown(displayContent) });
     /* Wrap chapter content in the same liquid-glass material family as the shell. */
     var glassWrap = h('div', { class: 'chapter-glass-wrap' });
     glassWrap.appendChild(badge);
@@ -2421,6 +2471,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       var preview = findMatchContext(m.chapter.content || '', terms, 140);
       var item = h('div', {
         class: 'search-result-item',
+        data: { testid: 'search-result' },
         on: {
           click: function () {
             loadChapter(m.sectionId, m.chapter.id);
@@ -2780,28 +2831,6 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     return false;
   }
 
-  // ===================== SERVICE WORKER =====================
-  // We intentionally no longer register a caching service worker: offline
-  // support was trading too much for cache-invalidation pain (stale app.js
-  // kept Mermaid diagrams broken after fixes landed). If any existing client
-  // still has an SW controlling this page, we actively unregister it and
-  // wipe its caches so the next reload is a clean slate.
-  function registerSW() {
-    if (!('serviceWorker' in navigator)) return;
-    try {
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        regs.forEach(function (reg) { try { reg.unregister(); } catch (_) { } });
-      }).catch(function () { });
-    } catch (_) { }
-    try {
-      if (typeof caches !== 'undefined' && caches.keys) {
-        caches.keys().then(function (names) {
-          names.forEach(function (n) { try { caches.delete(n); } catch (_) { } });
-        }).catch(function () { });
-      }
-    } catch (_) { }
-  }
-
   // ===================== INIT =====================
   function init() {
     dom.contentArea = document.getElementById('content-area');
@@ -2917,7 +2946,6 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     initAccountUi();
 
-    registerSW();
     initMagneticNav();
   }
 
@@ -3064,5 +3092,48 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     });
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  var appStarted = false;
+
+  function renderBootError(error) {
+    var contentArea = document.getElementById("content-area");
+    if (!contentArea) return;
+
+    contentArea.textContent = "";
+    var card = document.createElement("section");
+    card.className = "chapter-error-card";
+
+    var heading = document.createElement("h2");
+    heading.textContent = "TechPrimer could not load";
+
+    var message = document.createElement("p");
+    message.textContent = navigator.onLine
+      ? "Reload the page to retry."
+      : "Reconnect once so the required reading files can be restored.";
+
+    card.appendChild(heading);
+    card.appendChild(message);
+    contentArea.appendChild(card);
+    console.error(error);
+  }
+
+  function boot() {
+    if (appStarted) return;
+    appStarted = true;
+
+    if (
+      !window.TP_VENDOR_READY ||
+      typeof window.TP_VENDOR_READY.then !== "function"
+    ) {
+      renderBootError(new Error("Vendor readiness promise is unavailable"));
+      return;
+    }
+
+    window.TP_VENDOR_READY
+      .then(function () {
+        init();
+      })
+      .catch(renderBootError);
+  }
+
+  document.addEventListener("DOMContentLoaded", boot);
 })();

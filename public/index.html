@@ -8,7 +8,8 @@
     <meta name="description"
         content="A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.">
     <meta name="robots" content="index,follow">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="@@URL:manifest.webmanifest@@">
+    <link rel="apple-touch-icon" sizes="180x180" href="@@URL:icons/apple-touch-icon-180.png@@">
     <meta name="theme-color" content="#b09828">
     <meta name="theme-color" content="#1e1e1e" media="(prefers-color-scheme: dark)">
     <meta name="application-name" content="Tech Primer">
@@ -25,55 +26,18 @@
     <meta name="twitter:title" content="Tech Primer — Complete Guide">
     <meta name="twitter:description"
         content="A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.">
-    <script>
-        // Nuke any existing service worker + its caches on every page load. The old
-        // caching SW traded offline support for painful cache-invalidation bugs, so
-        // we've removed it entirely. This inline script runs before any other script
-        // so even stale app.js bundles still get the cleanup treatment.
-        (function () {
-            if (!('serviceWorker' in navigator)) return;
-            var needReload = false;
-            try {
-                navigator.serviceWorker.getRegistrations().then(function (regs) {
-                    if (regs && regs.length) needReload = true;
-                    return Promise.all(regs.map(function (r) {
-                        return r.unregister().catch(function () { });
-                    }));
-                }).then(function () {
-                    if (typeof caches !== 'undefined' && caches.keys) {
-                        return caches.keys().then(function (names) {
-                            if (names && names.length) needReload = true;
-                            return Promise.all(names.map(function (n) { return caches.delete(n); }));
-                        });
-                    }
-                }).then(function () {
-                    // Reload once (and only once) so the freshly-unregistered page actually
-                    // fetches the current assets from the network instead of continuing to
-                    // run whatever stale JS the old SW served us.
-                    if (!needReload) return;
-                    if (sessionStorage.getItem('__sw_reset__') === '1') return;
-                    sessionStorage.setItem('__sw_reset__', '1');
-                    try { window.location.reload(); } catch (_) { }
-                }).catch(function () { });
-            } catch (_) { }
-        })();
-    </script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-    <!-- All third-party CDN dependencies (Google Fonts, marked, highlight.js,
-     Fuse, mermaid, pako, Three.js import map) live in vendor.js as a single
-     source of truth. It uses document.write during parsing to inject the
-     equivalent <link>/<script> tags inline, preserving load order and
-     blocking body parsing until vendors finish. Edit vendor.js to add or
-     update any HTTPS dependency — index.html should never need to grow new
-     https:// URLs. -->
-    <script src="vendor.js?v=20260515-mindmap2"></script>
-
-    <link rel="stylesheet" href="styles.css?v=20260515-mindmap2">
+    <link rel="stylesheet" href="@@URL:styles.css@@" integrity="@@SRI:styles.css@@" crossorigin="anonymous">
+    <script src="@@URL:vendor.js@@" integrity="@@SRI:vendor.js@@" crossorigin="anonymous"></script>
 </head>
 
 <body class="home-page">
+    <aside id="pwa-status" class="pwa-status" role="status" aria-live="polite" hidden>
+        <span data-pwa-message></span>
+        <button id="pwa-update-button" type="button" hidden>Update</button>
+    </aside>
     <canvas id="bg-3d-canvas" aria-hidden="true"></canvas>
     <svg style="position:absolute;width:0;height:0" aria-hidden="true">
         <filter id="water-droplets">
@@ -111,7 +75,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg></div>
-                <input type="text" class="search-input" id="search-input" placeholder="Search across all topics…"
+                <input type="text" class="search-input" id="search-input" data-testid="search-input" placeholder="Search across all topics…"
                     autocomplete="off">
                 <kbd class="search-kbd">/</kbd>
                 <div class="search-results" id="search-results"></div>
@@ -186,7 +150,7 @@
     </aside>
 
     <main class="guide-main" id="main-content">
-        <div class="content-wrapper" id="content-area"></div>
+        <div class="content-wrapper" id="content-area" data-testid="content-area"></div>
     </main>
 
     <!-- Slide panels -->
@@ -253,18 +217,14 @@
         </svg>
     </button>
 
-    <!-- Body scripts use `defer` so they execute after vendor.js's dynamic
-         async=false vendor scripts have all loaded. The `CONTENT` ->
-         `CONTENT_FULL` rename that used to live as an inline bridge here is
-         now done at the top of app.js's IIFE — inline scripts can't be
-         deferred, and we need this rename to happen after content.js. -->
-    <script defer src="question-sections.js?v=20260515-mindmap2"></script>
-    <script defer src="content.js?v=20260515-mindmap2"></script>
-    <script defer src="mindmaps.js?v=20260515-mindmap2"></script>
-    <script defer src="mindmap.js?v=20260515-mindmap2"></script>
-    <script type="module" src="three-bg.js?v=20260515-mindmap2"></script>
-    <script type="module" src="three-welcome.js?v=20260515-mindmap2"></script>
-    <script defer src="app.js?v=20260515-mindmap2"></script>
+    <script defer src="@@URL:question-sections.js@@" integrity="@@SRI:question-sections.js@@" crossorigin="anonymous"></script>
+    <script defer src="@@URL:content.js@@" integrity="@@SRI:content.js@@" crossorigin="anonymous"></script>
+    <script defer src="@@URL:mindmaps.js@@" integrity="@@SRI:mindmaps.js@@" crossorigin="anonymous"></script>
+    <script defer src="@@URL:mindmap.js@@" integrity="@@SRI:mindmap.js@@" crossorigin="anonymous"></script>
+    <script defer src="@@URL:pwa-client.js@@" integrity="@@SRI:pwa-client.js@@" crossorigin="anonymous"></script>
+    <script type="module" src="@@URL:three-bg.js@@" integrity="@@SRI:three-bg.js@@" crossorigin="anonymous"></script>
+    <script type="module" src="@@URL:three-welcome.js@@" integrity="@@SRI:three-welcome.js@@" crossorigin="anonymous"></script>
+    <script defer src="@@URL:app.js@@" integrity="@@SRI:app.js@@" crossorigin="anonymous"></script>
 </body>
 
 </html>
