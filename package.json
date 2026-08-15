@@ -9,7 +9,8 @@
     "kv:create": "wrangler kv namespace create USER_STORE",
     "kv:create:preview": "wrangler kv namespace create USER_STORE --preview",
     "tail": "wrangler tail",
-    "build:mindmaps": "node scripts/build-mindmaps.mjs"
+    "build:mindmaps": "node scripts/build-mindmaps.mjs",
+    "test": "node tests/build/build-pwa.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

@@ -528,7 +528,7 @@
         el('span', { class: 'chapter-mindmap-eyebrow', text: 'Chapter Mind Map' }),
         el('span', { class: 'chapter-mindmap-hint', text: 'A colour-coded recap — each branch shows everything you just read about that topic.' })
       ]));
-      var container = el('div', { class: 'chapter-mindmap-container' });
+      var container = el('div', { class: 'chapter-mindmap-container', data: { testid: 'mind-map' } });
       container.appendChild(renderTree(tree, bounds));
       card.appendChild(container);
       return card;
