@@ -922,12 +922,35 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   // ===================== MARKDOWN & CONTENT =====================
   function configureMarked() { marked.setOptions({ gfm: true, breaks: false }); }
 
+  function looksLikeMermaidSource(value) {
+    return Boolean(
+      window.TechPrimerMermaidDetector &&
+      window.TechPrimerMermaidDetector.looksLikeMermaidSource(value)
+    );
+  }
+
+  function isMermaidCodeBlock(block) {
+    if (
+      block.classList.contains('language-mermaid') ||
+      block.classList.contains('lang-mermaid')
+    ) {
+      return true;
+    }
+    var explicitLanguage = Array.from(block.classList).some(function (className) {
+      return (
+        className.indexOf('language-') === 0 ||
+        className.indexOf('lang-') === 0
+      );
+    });
+    return !explicitLanguage && looksLikeMermaidSource(block.textContent);
+  }
+
   function highlightCode() {
     dom.contentArea.querySelectorAll('pre code').forEach(function (block) {
       // Mermaid blocks are converted to SVG diagrams later; never let
       // highlight.js touch them - it strips the original textContent on
       // reprocess and removes the language-mermaid class on some builds.
-      if (block.classList.contains('language-mermaid') || block.classList.contains('lang-mermaid')) return;
+      if (isMermaidCodeBlock(block)) return;
       var hasLang = false;
       block.classList.forEach(function (c) { if (c.indexOf('language-') === 0) hasLang = true; });
       if (!hasLang) block.classList.add('language-' + DEFAULT_LANG);
@@ -1499,7 +1522,9 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (!md) return;
 
     var pending = [];
-    var codeBlocks = md.querySelectorAll('pre code.language-mermaid, pre code.lang-mermaid');
+    var codeBlocks = Array.from(md.querySelectorAll('pre code')).filter(
+      isMermaidCodeBlock
+    );
     codeBlocks.forEach(function (code) {
       var pre = code.closest('pre');
       if (!pre) return;
@@ -2578,6 +2603,1173 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     });
   }
 
+  // ===================== DOMAIN PDF ZIP EXPORT =====================
+  var domainPdfCounter = 0;
+  var domainPdfExportState = null;
+
+  function domainPdfSlug(value) {
+    return String(value || 'chapter')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 90) || 'chapter';
+  }
+
+  function domainPdfLibrariesReady() {
+    return (
+      typeof html2canvas === 'function' &&
+      window.jspdf &&
+      typeof window.jspdf.jsPDF === 'function' &&
+      window.jspdf.jsPDF.API &&
+      typeof window.jspdf.jsPDF.API.svg === 'function' &&
+      typeof mermaid !== 'undefined' &&
+      typeof pako !== 'undefined' &&
+      window.fflate &&
+      typeof window.fflate.Zip === 'function'
+    );
+  }
+
+  function setDomainPdfButtonsDisabled(disabled) {
+    document.querySelectorAll('.domain-pdf-button').forEach(function (button) {
+      button.disabled = disabled || !domainPdfLibrariesReady();
+      button.title = button.disabled && !domainPdfExportState
+        ? 'PDF export libraries are still loading'
+        : 'Download one PDF per chapter';
+    });
+  }
+
+  function showDomainPdfProgress(domain, total) {
+    var status = h('div', {
+      class: 'domain-pdf-status',
+      text: 'Preparing chapter 1 of ' + total + '\u2026'
+    });
+    var progress = h('progress', {
+      class: 'domain-pdf-progress-bar',
+      max: total,
+      value: 0
+    });
+    var cancel = h('button', {
+      class: 'domain-pdf-cancel',
+      type: 'button',
+      text: 'Cancel'
+    });
+    var eta = h('span', {
+      class: 'domain-pdf-estimate-value',
+      text: 'Estimating time\u2026'
+    });
+    var size = h('span', {
+      class: 'domain-pdf-estimate-value',
+      text: 'Estimating ZIP size\u2026'
+    });
+    var estimates = h('div', { class: 'domain-pdf-estimates' }, [
+      h('div', {}, [
+        h('span', { class: 'domain-pdf-estimate-label', text: 'Remaining' }),
+        eta
+      ]),
+      h('div', {}, [
+        h('span', { class: 'domain-pdf-estimate-label', text: 'Estimated ZIP' }),
+        size
+      ])
+    ]);
+    var panel = h('div', { class: 'domain-pdf-progress-panel' }, [
+      h('strong', { text: 'Creating ' + domain.label + ' PDFs' }),
+      h('p', {
+        text: 'Each chapter is rendered with its diagrams, images, code, and mind map before being added to the ZIP.'
+      }),
+      progress,
+      status,
+      estimates,
+      cancel
+    ]);
+    var overlay = h('div', {
+      class: 'domain-pdf-progress-overlay',
+      role: 'dialog',
+      'aria-modal': 'true',
+      'aria-label': 'Creating domain PDF ZIP'
+    }, panel);
+    cancel.addEventListener('click', function () {
+      if (domainPdfExportState) domainPdfExportState.cancelled = true;
+      status.textContent = 'Cancelling after the current page\u2026';
+      cancel.disabled = true;
+    });
+    document.body.appendChild(overlay);
+    return {
+      overlay: overlay,
+      progress: progress,
+      status: status,
+      cancel: cancel,
+      eta: eta,
+      size: size
+    };
+  }
+
+  function updateDomainPdfProgress(ui, index, total, chapterTitle, phase) {
+    ui.status.textContent =
+      phase + ' \u2014 ' + chapterTitle + ' (' + index + ' of ' + total + ')';
+  }
+
+  function formatDomainPdfDuration(milliseconds) {
+    if (!isFinite(milliseconds) || milliseconds <= 0) return 'Calculating\u2026';
+    var seconds = Math.max(1, Math.round(milliseconds / 1000));
+    var minutes = Math.floor(seconds / 60);
+    var remainder = seconds % 60;
+    return minutes
+      ? minutes + 'm ' + String(remainder).padStart(2, '0') + 's'
+      : seconds + 's';
+  }
+
+  function formatDomainPdfBytes(bytes) {
+    if (!isFinite(bytes) || bytes <= 0) return 'Calculating\u2026';
+    if (bytes >= 1024 * 1024) {
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+    return Math.ceil(bytes / 1024) + ' KB';
+  }
+
+  function updateDomainPdfEstimates(ui, completed, total) {
+    if (!domainPdfExportState || !completed) return;
+    var elapsed = performance.now() - domainPdfExportState.startedAt;
+    var average = elapsed / completed;
+    ui.eta.textContent = formatDomainPdfDuration(
+      average * Math.max(0, total - completed)
+    );
+    ui.size.textContent = formatDomainPdfBytes(
+      (domainPdfExportState.pdfBytes / completed) * total
+    );
+  }
+
+  function domainPdfYield() {
+    return new Promise(function (resolve) {
+      requestAnimationFrame(function () { setTimeout(resolve, 0); });
+    });
+  }
+
+  function ensureDomainPdfWakeLock() {
+    if (
+      !domainPdfExportState ||
+      domainPdfExportState.wakeLock ||
+      !navigator.wakeLock ||
+      typeof navigator.wakeLock.request !== 'function' ||
+      document.visibilityState !== 'visible'
+    ) {
+      return Promise.resolve();
+    }
+    return navigator.wakeLock.request('screen').then(function (lock) {
+      if (!domainPdfExportState) {
+        lock.release().catch(function () { });
+        return;
+      }
+      domainPdfExportState.wakeLock = lock;
+      lock.addEventListener('release', function () {
+        if (domainPdfExportState) domainPdfExportState.wakeLock = null;
+      });
+    }).catch(function () { });
+  }
+
+  function releaseDomainPdfWakeLock() {
+    if (!domainPdfExportState || !domainPdfExportState.wakeLock) {
+      return Promise.resolve();
+    }
+    var lock = domainPdfExportState.wakeLock;
+    domainPdfExportState.wakeLock = null;
+    return lock.release().catch(function () { });
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && domainPdfExportState) {
+      ensureDomainPdfWakeLock();
+    }
+  });
+
+  function checkDomainPdfResources(entries, writer) {
+    var warnings = [];
+    var expectedBytes = Math.max(
+      100 * 1024 * 1024,
+      entries.length * 2 * 1024 * 1024
+    );
+    if (navigator.deviceMemory && navigator.deviceMemory <= 4 && entries.length > 20) {
+      warnings.push(
+        'This device reports ' + navigator.deviceMemory +
+        ' GB of memory. Keep other large applications closed during export.'
+      );
+    }
+    if (performance.memory) {
+      var availableHeap =
+        performance.memory.jsHeapSizeLimit - performance.memory.usedJSHeapSize;
+      var requiredHeap = writer.savedDirectly
+        ? 300 * 1024 * 1024
+        : Math.max(350 * 1024 * 1024, expectedBytes * 1.5);
+      if (availableHeap < requiredHeap) {
+        warnings.push(
+          'The browser may not have enough free memory for this export.'
+        );
+      }
+    }
+
+    if (entries.length > 40) {
+      warnings.push(
+        'This is a large domain. Keep at least ' +
+        formatDomainPdfBytes(expectedBytes * 1.5) +
+        ' of disk space available.'
+      );
+    }
+
+    var estimatePromise =
+      !writer.savedDirectly &&
+      navigator.storage &&
+      typeof navigator.storage.estimate === 'function'
+        ? navigator.storage.estimate()
+        : Promise.resolve(null);
+    return estimatePromise.catch(function () {
+      return null;
+    }).then(function (estimate) {
+      if (
+        estimate &&
+        isFinite(estimate.quota) &&
+        isFinite(estimate.usage) &&
+        estimate.quota - estimate.usage < expectedBytes
+      ) {
+        warnings.push(
+          'The browser reports less storage quota than the estimated ' +
+          formatDomainPdfBytes(expectedBytes) + ' fallback download size.'
+        );
+      }
+      if (!warnings.length) return true;
+      return window.confirm(
+        warnings.join('\n\n') +
+        '\n\nContinue with the domain export?'
+      );
+    });
+  }
+
+  function waitForDomainPdfImages(root) {
+    var images = Array.from(root.querySelectorAll('img'));
+    if (!images.length) return Promise.resolve();
+    images.forEach(function (image) {
+      var src = image.getAttribute('src') || '';
+      if (/^https?:\/\//i.test(src) && !image.crossOrigin) {
+        image.crossOrigin = 'anonymous';
+        image.src = src;
+      }
+    });
+    return Promise.all(images.map(function (image) {
+      if (image.complete) return Promise.resolve();
+      return new Promise(function (resolve) {
+        var timer = setTimeout(resolve, 10000);
+        function done() {
+          clearTimeout(timer);
+          image.removeEventListener('load', done);
+          image.removeEventListener('error', done);
+          resolve();
+        }
+        image.addEventListener('load', done);
+        image.addEventListener('error', done);
+      });
+    })).then(function () {
+      images.forEach(function (image) {
+        if (image.naturalWidth) return;
+        var replacement = h('div', {
+          class: 'domain-pdf-image-error',
+          text: image.alt
+            ? 'Image unavailable: ' + image.alt
+            : 'Image unavailable'
+        });
+        image.replaceWith(replacement);
+      });
+    });
+  }
+
+  function renderDomainPdfMermaid(root) {
+    if (typeof mermaid === 'undefined') return Promise.resolve();
+    var pending = [];
+    Array.from(root.querySelectorAll('pre code'))
+      .filter(isMermaidCodeBlock)
+      .forEach(function (code) {
+      var pre = code.closest('pre');
+      if (pre) {
+        pending.push({
+          element: pre,
+          code: code.textContent || '',
+          fallbackImage: null
+        });
+      }
+    });
+    root.querySelectorAll('img[src*="mermaid.ink"]').forEach(function (image) {
+      var src = image.getAttribute('src') || '';
+      var decoded = extractMermaidSourceFromMermaidInkUrl(src);
+      if (decoded) {
+        var parent = image.parentElement;
+        var replacementTarget =
+          parent &&
+          parent.tagName === 'P' &&
+          parent.children.length === 1 &&
+          !parent.textContent.trim()
+            ? parent
+            : image;
+        pending.push({
+          element: replacementTarget,
+          code: decoded,
+          fallbackImage: image
+        });
+      }
+    });
+    if (!pending.length) return Promise.resolve();
+
+    var theme = 'default';
+    try {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: theme,
+        securityLevel: 'strict',
+        htmlLabels: false,
+        fontFamily: 'Arial, Helvetica, sans-serif',
+        flowchart: { curve: 'basis', htmlLabels: false },
+        class: { htmlLabels: false }
+      });
+    } catch (_) { }
+
+    return pending.reduce(function (chain, item) {
+      return chain.then(function () {
+        if (domainPdfExportState && domainPdfExportState.cancelled) {
+          throw new Error('EXPORT_CANCELLED');
+        }
+        var container = h('div', { class: 'domain-pdf-mermaid' });
+        var id = 'domain-pdf-mermaid-' + (++domainPdfCounter);
+        var source = sanitizeMermaidSource(item.code);
+        return mermaid.render(id, source).then(function (result) {
+          if (isMermaidErrorSvg(result && result.svg)) {
+            throw new Error('Mermaid returned an error diagram.');
+          }
+          container.innerHTML = result.svg;
+          var svgEl = container.querySelector('svg');
+          if (svgEl) {
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.height = 'auto';
+          }
+          if (item.element.parentNode) {
+            item.element.parentNode.replaceChild(container, item.element);
+          }
+        }).catch(function (error) {
+          if (item.fallbackImage) return;
+          container.textContent = 'Diagram could not be rendered: ' +
+            ((error && error.message) || 'unknown error');
+          container.classList.add('domain-pdf-render-error');
+          if (item.element.parentNode) {
+            item.element.parentNode.replaceChild(container, item.element);
+          }
+        });
+      });
+    }, Promise.resolve());
+  }
+
+  function highlightDomainPdfCode(root) {
+    if (typeof hljs === 'undefined') return;
+    root.querySelectorAll('pre code').forEach(function (block) {
+      if (isMermaidCodeBlock(block)) return;
+      var hasLanguage = Array.from(block.classList).some(function (className) {
+        return className.indexOf('language-') === 0;
+      });
+      if (!hasLanguage) block.classList.add('language-plaintext');
+      try { hljs.highlightElement(block); } catch (_) { }
+    });
+  }
+
+  function splitDomainPdfPre(pre, maxLines) {
+    var code = pre.querySelector('code');
+    if (!code) return;
+    var lines = (code.textContent || '').split('\n');
+    if (lines.length <= maxLines) return;
+    var fragment = document.createDocumentFragment();
+    for (var start = 0; start < lines.length; start += maxLines) {
+      var nextCode = document.createElement('code');
+      nextCode.className = code.className;
+      nextCode.textContent = lines.slice(start, start + maxLines).join('\n');
+      var nextPre = document.createElement('pre');
+      nextPre.appendChild(nextCode);
+      fragment.appendChild(nextPre);
+      try { hljs.highlightElement(nextCode); } catch (_) { }
+    }
+    pre.replaceWith(fragment);
+  }
+
+  function splitDomainPdfList(list, maxHeight) {
+    var items = Array.from(list.children).filter(function (child) {
+      return child.tagName === 'LI';
+    });
+    if (list.getBoundingClientRect().height <= maxHeight) return;
+    var fragment = document.createDocumentFragment();
+    var groups = [];
+    var current = [];
+    var currentHeight = 0;
+    items.forEach(function (item) {
+      var itemHeight = domainPdfMeasuredHeight(item);
+      if (current.length && currentHeight + itemHeight > maxHeight) {
+        groups.push(current);
+        current = [];
+        currentHeight = 0;
+      }
+      current.push(item);
+      currentHeight += itemHeight;
+    });
+    if (current.length) groups.push(current);
+
+    var itemOffset = 0;
+    groups.forEach(function (group) {
+      var nextList = document.createElement(list.tagName.toLowerCase());
+      if (list.start && list.tagName === 'OL') {
+        nextList.start = list.start + itemOffset;
+      }
+      group.forEach(function (item) {
+        nextList.appendChild(item.cloneNode(true));
+      });
+      fragment.appendChild(nextList);
+      itemOffset += group.length;
+    });
+    list.replaceWith(fragment);
+  }
+
+  function splitDomainPdfTable(table, maxHeight) {
+    var body = table.tBodies && table.tBodies[0];
+    if (!body || table.getBoundingClientRect().height <= maxHeight) return;
+    var rows = Array.from(body.rows);
+    var fragment = document.createDocumentFragment();
+    var headerHeight = table.tHead
+      ? table.tHead.getBoundingClientRect().height
+      : 0;
+    var groups = [];
+    var current = [];
+    var currentHeight = headerHeight;
+    rows.forEach(function (row) {
+      var rowHeight = domainPdfMeasuredHeight(row);
+      if (current.length && currentHeight + rowHeight > maxHeight) {
+        groups.push(current);
+        current = [];
+        currentHeight = headerHeight;
+      }
+      current.push(row);
+      currentHeight += rowHeight;
+    });
+    if (current.length) groups.push(current);
+
+    groups.forEach(function (group, groupIndex) {
+      var nextTable = table.cloneNode(false);
+      if (table.caption) nextTable.appendChild(table.caption.cloneNode(true));
+      Array.from(table.querySelectorAll(':scope > colgroup')).forEach(function (group) {
+        nextTable.appendChild(group.cloneNode(true));
+      });
+      if (table.tHead) nextTable.appendChild(table.tHead.cloneNode(true));
+      var nextBody = document.createElement('tbody');
+      group.forEach(function (row) {
+        nextBody.appendChild(row.cloneNode(true));
+      });
+      nextTable.appendChild(nextBody);
+      if (
+        groupIndex === groups.length - 1 &&
+        table.tFoot
+      ) {
+        nextTable.appendChild(table.tFoot.cloneNode(true));
+      }
+      fragment.appendChild(nextTable);
+    });
+    table.replaceWith(fragment);
+  }
+
+  function splitDomainPdfContainer(container, maxHeight) {
+    var children = Array.from(container.children);
+    if (
+      children.length < 2 ||
+      container.getBoundingClientRect().height <= maxHeight
+    ) {
+      return;
+    }
+    var groups = [];
+    var current = [];
+    var currentHeight = 0;
+    children.forEach(function (child) {
+      var childHeight = domainPdfMeasuredHeight(child);
+      if (current.length && currentHeight + childHeight > maxHeight) {
+        groups.push(current);
+        current = [];
+        currentHeight = 0;
+      }
+      current.push(child);
+      currentHeight += childHeight;
+    });
+    if (current.length) groups.push(current);
+
+    var fragment = document.createDocumentFragment();
+    groups.forEach(function (group) {
+      var nextContainer = container.cloneNode(false);
+      group.forEach(function (child) {
+        nextContainer.appendChild(child.cloneNode(true));
+      });
+      fragment.appendChild(nextContainer);
+    });
+    container.replaceWith(fragment);
+  }
+
+  function expandDomainPdfDetails(root) {
+    root.querySelectorAll('details').forEach(function (details) {
+      var fragment = document.createDocumentFragment();
+      var summary = details.querySelector(':scope > summary');
+      if (summary) {
+        fragment.appendChild(h('h3', { text: summary.textContent.trim() }));
+      }
+      Array.from(details.children).forEach(function (child) {
+        if (child !== summary) fragment.appendChild(child.cloneNode(true));
+      });
+      details.replaceWith(fragment);
+    });
+  }
+
+  function normalizeDomainPdfPageBlocks(root) {
+    expandDomainPdfDetails(root);
+    root.querySelectorAll('pre').forEach(function (pre) {
+      splitDomainPdfPre(pre, 36);
+    });
+    root.querySelectorAll('table').forEach(function (table) {
+      splitDomainPdfTable(table, 850);
+    });
+    root.querySelectorAll('ul, ol').forEach(function (list) {
+      splitDomainPdfList(list, 850);
+    });
+    root.querySelectorAll('blockquote').forEach(function (blockquote) {
+      splitDomainPdfContainer(blockquote, 850);
+    });
+  }
+
+  function createDomainPdfStage(domain, section, chapter, chapterIndex, total) {
+    var stage = h('div', { class: 'domain-pdf-export-stage' });
+    var header = h('header', { class: 'domain-pdf-chapter-header' }, [
+      h('div', {
+        class: 'domain-pdf-domain-label',
+        text: domain.icon + ' ' + domain.label
+      }),
+      h('h1', { text: chapter.title }),
+      h('p', {
+        text: section.title + ' \u00b7 Chapter ' + chapterIndex + ' of ' + total
+      })
+    ]);
+    var markdown = h('div', {
+      class: 'md-content domain-pdf-markdown',
+      html: marked.parse(
+        stripMatchingLeadingHeading(chapter.content || '', chapter.title)
+      )
+    });
+    stage.appendChild(header);
+    stage.appendChild(markdown);
+
+    highlightDomainPdfCode(markdown);
+
+    var mindMap = null;
+    if (window.AllWebMindMap && typeof window.AllWebMindMap.toSvg === 'function') {
+      try {
+        var mindMapMarkup = window.AllWebMindMap.toSvg({
+          sectionId: section.id,
+          chapterId: chapter.id,
+          chapterTitle: chapter.title
+        });
+        if (mindMapMarkup) {
+          mindMap = h('div', { class: 'domain-pdf-vector domain-pdf-mindmap-vector' }, [
+            h('h2', { text: 'Chapter Mind Map' }),
+            h('div', {
+              class: 'domain-pdf-vector-svg',
+              html: mindMapMarkup.replace(/^<\?xml[^>]*>\s*/i, '')
+            })
+          ]);
+        }
+      } catch (_) { mindMap = null; }
+    }
+    if (mindMap) stage.appendChild(mindMap);
+    document.body.appendChild(stage);
+    return {
+      stage: stage,
+      header: header,
+      markdown: markdown,
+      mindMap: mindMap
+    };
+  }
+
+  function addDomainPdfCanvas(pdf, canvas, layout, options) {
+    options = options || {};
+    var imageFormat = options.lossless ? 'PNG' : 'JPEG';
+    var imageData = options.lossless
+      ? canvas.toDataURL('image/png')
+      : canvas.toDataURL('image/jpeg', 0.78);
+    var pageWidth = pdf.internal.pageSize.getWidth();
+    var pageHeight = pdf.internal.pageSize.getHeight();
+    var contentWidth = pageWidth - layout.margin * 2;
+    var usableHeight = pageHeight - layout.margin - layout.footerHeight;
+    var pixelsPerMm = canvas.width / contentWidth;
+    var renderedHeight = canvas.height / pixelsPerMm;
+
+    function addPage() {
+      pdf.addPage();
+      layout.y = layout.margin;
+    }
+
+    if (renderedHeight <= usableHeight - layout.margin) {
+      if (layout.y + renderedHeight > usableHeight) addPage();
+      pdf.addImage(
+        imageData,
+        imageFormat,
+        layout.margin,
+        layout.y,
+        contentWidth,
+        renderedHeight,
+        undefined,
+        'FAST'
+      );
+      layout.y += renderedHeight + layout.gap;
+      return;
+    }
+
+    if (layout.y > layout.margin) addPage();
+    var maxHeight = usableHeight - layout.margin;
+    var fitScale = maxHeight / renderedHeight;
+    var fittedWidth = contentWidth * fitScale;
+    var fittedX = layout.margin + (contentWidth - fittedWidth) / 2;
+    pdf.addImage(
+      imageData,
+      imageFormat,
+      fittedX,
+      layout.margin,
+      fittedWidth,
+      maxHeight,
+      undefined,
+      'FAST'
+    );
+    layout.y = layout.margin + maxHeight + layout.gap;
+  }
+
+  function addDomainPdfPageNumbers(pdf, domain, chapter) {
+    var totalPages = pdf.getNumberOfPages();
+    var pageWidth = pdf.internal.pageSize.getWidth();
+    var pageHeight = pdf.internal.pageSize.getHeight();
+    for (var page = 1; page <= totalPages; page++) {
+      pdf.setPage(page);
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(
+        domain.label + ' \u00b7 ' + chapter.title,
+        10,
+        pageHeight - 6,
+        { maxWidth: pageWidth - 38 }
+      );
+      pdf.text(
+        page + ' / ' + totalPages,
+        pageWidth - 10,
+        pageHeight - 6,
+        { align: 'right' }
+      );
+    }
+  }
+
+  function domainPdfMeasuredHeight(element) {
+    var style = getComputedStyle(element);
+    return (
+      element.getBoundingClientRect().height +
+      (parseFloat(style.marginTop) || 0) +
+      (parseFloat(style.marginBottom) || 0)
+    );
+  }
+
+  function buildDomainPdfRenderItems(rendered) {
+    var elements = [rendered.header]
+      .concat(Array.from(rendered.markdown.children));
+    if (rendered.mindMap) elements.push(rendered.mindMap);
+
+    var items = [];
+    var batch = [];
+    var batchHeight = 0;
+    var targetPageHeight = 980;
+
+    function flushBatch() {
+      if (!batch.length) return;
+      items.push({ type: 'raster', elements: batch.slice() });
+      batch = [];
+      batchHeight = 0;
+    }
+
+    elements.forEach(function (element) {
+      if (
+        element.classList.contains('domain-pdf-mermaid') &&
+        element.querySelector('svg')
+      ) {
+        flushBatch();
+        items.push({
+          type: 'mermaid-raster',
+          elements: [element]
+        });
+        return;
+      }
+      var svg = element.classList.contains('domain-pdf-vector')
+        ? element.querySelector('svg')
+        : null;
+      if (svg) {
+        flushBatch();
+        items.push({
+          type: 'vector',
+          element: element,
+          svg: svg,
+          title: element.classList.contains('domain-pdf-mindmap-vector')
+            ? 'Chapter Mind Map'
+            : null
+        });
+        return;
+      }
+
+      var height = domainPdfMeasuredHeight(element);
+      if (batch.length && batchHeight + height > targetPageHeight) {
+        flushBatch();
+      }
+      batch.push(element);
+      batchHeight += height;
+      if (height >= targetPageHeight) flushBatch();
+    });
+    flushBatch();
+    return items;
+  }
+
+  function createDomainPdfPageBatch(stage, elements) {
+    var page = h('section', {
+      class: 'domain-pdf-page-batch md-content'
+    });
+    elements.forEach(function (element) {
+      page.appendChild(element.cloneNode(true));
+    });
+    stage.appendChild(page);
+    return page;
+  }
+
+  function renderDomainPdfBatch(pdf, stage, elements, layout, options) {
+    options = options || {};
+    var page = createDomainPdfPageBatch(stage, elements);
+    var captureWidth = Math.ceil(
+      Math.max(page.scrollWidth, page.offsetWidth, page.getBoundingClientRect().width)
+    );
+    var captureHeight = Math.ceil(
+      Math.max(page.scrollHeight, page.offsetHeight, page.getBoundingClientRect().height)
+    );
+    return html2canvas(page, {
+      backgroundColor: '#ffffff',
+      scale: options.scale || 1.0,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      imageTimeout: 12000,
+      width: captureWidth,
+      height: captureHeight,
+      windowWidth: Math.max(1000, captureWidth)
+    }).then(function (canvas) {
+      addDomainPdfCanvas(pdf, canvas, layout, options);
+      return domainPdfYield();
+    }).finally(function () {
+      page.remove();
+    });
+  }
+
+  function addDomainPdfSvg(pdf, item, layout) {
+    var unsupported = item.svg.querySelector(
+      'foreignObject, filter, mask, textPath, use[href^="http"], use[xlink\\:href^="http"]'
+    );
+    if (unsupported || typeof pdf.svg !== 'function') {
+      return renderDomainPdfBatch(
+        pdf,
+        item.element.closest('.domain-pdf-export-stage'),
+        [item.element],
+        layout,
+        { scale: 2, lossless: true }
+      );
+    }
+
+    var pageWidth = pdf.internal.pageSize.getWidth();
+    var pageHeight = pdf.internal.pageSize.getHeight();
+    var contentWidth = pageWidth - layout.margin * 2;
+    var usableBottom = pageHeight - layout.footerHeight;
+    var viewBox = item.svg.viewBox && item.svg.viewBox.baseVal;
+    var sourceWidth =
+      (viewBox && viewBox.width) ||
+      parseFloat(item.svg.getAttribute('width')) ||
+      item.svg.getBoundingClientRect().width ||
+      800;
+    var sourceHeight =
+      (viewBox && viewBox.height) ||
+      parseFloat(item.svg.getAttribute('height')) ||
+      item.svg.getBoundingClientRect().height ||
+      500;
+    var titleHeight = item.title ? 10 : 0;
+    var targetWidth = contentWidth;
+    var targetHeight = targetWidth * (sourceHeight / sourceWidth);
+    var maxHeight = usableBottom - layout.margin - titleHeight;
+
+    if (targetHeight > maxHeight) {
+      targetHeight = maxHeight;
+      targetWidth = targetHeight * (sourceWidth / sourceHeight);
+    }
+    if (layout.y + titleHeight + targetHeight > usableBottom) {
+      pdf.addPage();
+      layout.y = layout.margin;
+    }
+    var vectorStartY = layout.y;
+    if (item.title) {
+      pdf.setFontSize(15);
+      pdf.setTextColor(31, 41, 55);
+      pdf.text(item.title, layout.margin, layout.y + 6);
+      layout.y += titleHeight;
+    }
+    var x = layout.margin + (contentWidth - targetWidth) / 2;
+    return pdf.svg(item.svg, {
+      x: x,
+      y: layout.y,
+      width: targetWidth,
+      height: targetHeight
+    }).then(function () {
+      layout.y += targetHeight + layout.gap;
+      return domainPdfYield();
+    }).catch(function () {
+      layout.y = vectorStartY;
+      return renderDomainPdfBatch(
+        pdf,
+        item.element.closest('.domain-pdf-export-stage'),
+        [item.element],
+        layout,
+        { scale: 2, lossless: true }
+      );
+    });
+  }
+
+  function buildChapterPdf(domain, section, chapter, chapterIndex, total) {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      return Promise.reject(new Error('jsPDF did not load.'));
+    }
+    if (typeof html2canvas !== 'function') {
+      return Promise.reject(new Error('html2canvas did not load.'));
+    }
+
+    var rendered = createDomainPdfStage(
+      domain,
+      section,
+      chapter,
+      chapterIndex,
+      total
+    );
+    return renderDomainPdfMermaid(rendered.markdown)
+      .then(function () { return waitForDomainPdfImages(rendered.stage); })
+      .then(function () {
+        normalizeDomainPdfPageBlocks(rendered.markdown);
+        var pdf = new window.jspdf.jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true,
+          putOnlyUsedFonts: true
+        });
+        var layout = {
+          margin: 10,
+          footerHeight: 13,
+          gap: 2.5,
+          y: 10
+        };
+        var renderItems = buildDomainPdfRenderItems(rendered);
+        return renderItems.reduce(function (chain, item) {
+          return chain.then(function () {
+            if (domainPdfExportState && domainPdfExportState.cancelled) {
+              throw new Error('EXPORT_CANCELLED');
+            }
+            if (item.type === 'vector') {
+              return addDomainPdfSvg(pdf, item, layout);
+            }
+            return renderDomainPdfBatch(
+                pdf,
+                rendered.stage,
+                item.elements,
+                layout,
+                item.type === 'mermaid-raster'
+                  ? { scale: 2, lossless: true }
+                  : { scale: 1, lossless: false }
+              );
+          });
+        }, Promise.resolve()).then(function () {
+          addDomainPdfPageNumbers(pdf, domain, chapter);
+          return new Uint8Array(pdf.output('arraybuffer'));
+        });
+      })
+      .finally(function () {
+        rendered.stage.remove();
+      });
+  }
+
+  function createDomainPdfZipWriter(domain) {
+    if (
+      !window.fflate ||
+      typeof window.fflate.Zip !== 'function' ||
+      typeof window.fflate.ZipPassThrough !== 'function'
+    ) {
+      return Promise.reject(new Error('ZIP library did not load.'));
+    }
+
+    function makeWriter(writable) {
+      var chunks = [];
+      var bytesWritten = 0;
+      var writeChain = Promise.resolve();
+      var resolveComplete;
+      var rejectComplete;
+      var complete = new Promise(function (resolve, reject) {
+        resolveComplete = resolve;
+        rejectComplete = reject;
+      });
+      var zip = new window.fflate.Zip(function (error, chunk, final) {
+        if (error) {
+          rejectComplete(error);
+          return;
+        }
+        if (chunk && chunk.length) {
+          var stableChunk = chunk.slice();
+          bytesWritten += stableChunk.byteLength;
+          if (writable) {
+            writeChain = writeChain.then(function () {
+              return writable.write(stableChunk);
+            });
+          } else {
+            chunks.push(stableChunk);
+          }
+        }
+        if (final) {
+          writeChain.then(function () {
+            if (!writable) {
+              resolveComplete({
+                blob: new Blob(chunks, { type: 'application/zip' }),
+                bytes: bytesWritten,
+                savedDirectly: false
+              });
+              return;
+            }
+            return writable.close().then(function () {
+              resolveComplete({
+                blob: null,
+                bytes: bytesWritten,
+                savedDirectly: true
+              });
+            });
+          }).catch(rejectComplete);
+        }
+      });
+      return {
+        zip: zip,
+        complete: complete,
+        savedDirectly: !!writable,
+        waitForWrites: function () { return writeChain; },
+        abort: function () {
+          try { zip.terminate(); } catch (_) { }
+          return writable && typeof writable.abort === 'function'
+            ? writable.abort().catch(function () { })
+            : Promise.resolve();
+        }
+      };
+    }
+
+    if (typeof window.showSaveFilePicker !== 'function') {
+      return Promise.resolve(makeWriter(null));
+    }
+    return window.showSaveFilePicker({
+      suggestedName: domainPdfSlug(domain.label) + '-chapter-pdfs.zip',
+      types: [{
+        description: 'ZIP archive',
+        accept: { 'application/zip': ['.zip'] }
+      }]
+    }).then(function (handle) {
+      return handle.createWritable();
+    }).then(makeWriter);
+  }
+
+  function addDomainPdfZipFile(writer, fileName, bytes) {
+    var file = new window.fflate.ZipPassThrough(fileName);
+    writer.zip.add(file);
+    file.push(bytes, true);
+    return writer.waitForWrites();
+  }
+
+  function finishDomainPdfZip(domain, writer) {
+    return addDomainPdfZipFile(
+      writer,
+      'README.txt',
+      window.fflate.strToU8(
+      domain.label + '\n\n' +
+      'This archive contains one PDF per chapter. Each PDF includes the rendered chapter content, diagrams, images, highlighted code, and available mind maps.\n'
+      )
+    ).then(function () {
+      writer.zip.end();
+      return writer.complete;
+    }).then(function (result) {
+      if (result.savedDirectly) return result.bytes;
+      var url = URL.createObjectURL(result.blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = domainPdfSlug(domain.label) + '-chapter-pdfs.zip';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      return result.bytes;
+    });
+  }
+
+  function collectDomainPdfChapters(prefix) {
+    var entries = [];
+    CONTENT.filter(function (section) {
+      return section.id.indexOf(prefix) === 0;
+    }).forEach(function (section) {
+      (section.chapters || []).forEach(function (chapter) {
+        resolveChapterContent(chapter);
+        if (chapter.content) {
+          entries.push({ section: section, chapter: chapter });
+        }
+      });
+    });
+    return entries;
+  }
+
+  function exportDomainPdfZip(prefix) {
+    if (domainPdfExportState) return;
+    if (!domainPdfLibrariesReady()) {
+      alert('PDF export libraries are still loading. Please try again shortly.');
+      return;
+    }
+    var domain = DOMAINS.find(function (item) { return item.prefix === prefix; });
+    if (!domain) return;
+    var writerPromise = createDomainPdfZipWriter(domain);
+
+    loadDomainContent(prefix, function () {
+      var entries = collectDomainPdfChapters(prefix);
+      if (!entries.length) {
+        writerPromise.then(function (emptyWriter) {
+          return emptyWriter.abort();
+        }).catch(function () { });
+        alert('No chapters were found for ' + domain.label + '.');
+        return;
+      }
+
+      var writer = null;
+      var ui = null;
+      domainPdfExportState = {
+        cancelled: false,
+        checking: true,
+        writer: null,
+        wakeLock: null,
+        startedAt: 0,
+        pdfBytes: 0
+      };
+      setDomainPdfButtonsDisabled(true);
+
+      writerPromise
+        .then(function (resolvedWriter) {
+          writer = resolvedWriter;
+          return checkDomainPdfResources(entries, writer).then(function (proceed) {
+            return [writer, proceed];
+          });
+        })
+        .then(function (results) {
+          writer = results[0];
+          var proceed = results[1];
+          if (!proceed) throw new Error('EXPORT_DECLINED');
+          domainPdfExportState.writer = writer;
+          domainPdfExportState.checking = false;
+          domainPdfExportState.startedAt = performance.now();
+          ui = showDomainPdfProgress(domain, entries.length);
+          return ensureDomainPdfWakeLock();
+        })
+        .then(function () {
+          return entries.reduce(function (chain, entry, index) {
+            return chain.then(function () {
+              if (domainPdfExportState.cancelled) {
+                throw new Error('EXPORT_CANCELLED');
+              }
+              return ensureDomainPdfWakeLock().then(function () {
+                updateDomainPdfProgress(
+                  ui,
+                  index + 1,
+                  entries.length,
+                  entry.chapter.title,
+                  'Rendering'
+                );
+                return buildChapterPdf(
+                  domain,
+                  entry.section,
+                  entry.chapter,
+                  index + 1,
+                  entries.length
+                );
+              }).then(function (pdfBytes) {
+                var number = String(index + 1).padStart(2, '0');
+                domainPdfExportState.pdfBytes += pdfBytes.byteLength;
+                return addDomainPdfZipFile(
+                  writer,
+                  number + '-' + domainPdfSlug(entry.chapter.title) + '.pdf',
+                  pdfBytes
+                ).then(function () {
+                  pdfBytes = null;
+                  ui.progress.value = index + 1;
+                  updateDomainPdfEstimates(ui, index + 1, entries.length);
+                  return domainPdfYield();
+                });
+              });
+            });
+          }, Promise.resolve());
+        })
+        .then(function () {
+          updateDomainPdfProgress(
+            ui,
+            entries.length,
+            entries.length,
+            domain.label,
+            'Finalizing ZIP'
+          );
+          ui.eta.textContent = 'Less than a minute';
+          if (domainPdfExportState.cancelled) {
+            throw new Error('EXPORT_CANCELLED');
+          }
+          return finishDomainPdfZip(domain, writer).then(function (actualBytes) {
+            ui.size.textContent = formatDomainPdfBytes(actualBytes);
+            ui.eta.textContent = 'Complete';
+            ui.status.textContent = 'Download ready.';
+          });
+        })
+        .catch(function (error) {
+          var abortPromise =
+            writer && typeof writer.abort === 'function'
+              ? writer.abort()
+              : Promise.resolve();
+          return abortPromise.then(function () {
+            if (
+              (error && error.message === 'EXPORT_DECLINED') ||
+              (error && error.name === 'AbortError')
+            ) {
+              return;
+            }
+            if (error && error.message === 'EXPORT_CANCELLED') {
+              if (ui) ui.status.textContent = 'Export cancelled.';
+            } else {
+              console.error(error);
+              var message =
+                'Export failed: ' + ((error && error.message) || 'unknown error');
+              if (ui) ui.status.textContent = message;
+              alert(message);
+            }
+          });
+        })
+        .finally(function () {
+          releaseDomainPdfWakeLock().then(function () {
+            setTimeout(function () {
+              if (ui) ui.overlay.remove();
+              setDomainPdfButtonsDisabled(false);
+              domainPdfExportState = null;
+            }, ui ? 700 : 0);
+          });
+        });
+    });
+  }
+
   // ===================== WELCOME PAGE =====================
   function showWelcome() {
     document.body.classList.add('home-page');
@@ -2614,12 +3806,29 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     function makeDomainCard(d) {
       var secs = CONTENT.filter(function (s) { return s.id.indexOf(d.prefix) === 0; });
       var chCount = secs.reduce(function (a, s) { return a + s.chapters.length; }, 0);
+      var pdfButton = h('button', {
+        class: 'domain-pdf-button',
+        type: 'button',
+        text: 'Download chapter PDFs',
+        on: {
+          click: function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            exportDomainPdfZip(d.prefix);
+          }
+        }
+      });
+      pdfButton.disabled = !domainPdfLibrariesReady();
+      pdfButton.title = pdfButton.disabled
+        ? 'PDF export libraries are still loading'
+        : 'Download one PDF per chapter';
       return h('div', { class: 'welcome-domain', data: { domain: d.prefix }, on: { click: function () { onDomainClick(d.prefix); } } }, [
         h('div', { class: 'welcome-domain-icon', text: d.icon }),
         h('h3', { text: d.label }),
         h('p', { text: d.desc }),
         h('div', { class: 'welcome-domain-meta' }, [
-          h('span', { class: 'welcome-domain-count', text: chCount + ' chapter' + (chCount !== 1 ? 's' : '') })
+          h('span', { class: 'welcome-domain-count', text: chCount + ' chapter' + (chCount !== 1 ? 's' : '') }),
+          pdfButton
         ])
       ]);
     }
@@ -2823,6 +4032,14 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     configureMarked();
     initTheme();
     initContentFromManifest();
+    if (window.TP_PDF_EXPORT_READY) {
+      window.TP_PDF_EXPORT_READY
+        .then(function () { setDomainPdfButtonsDisabled(false); })
+        .catch(function (error) {
+          console.error('[PDF export] Vendor loading failed.', error);
+          setDomainPdfButtonsDisabled(true);
+        });
+    }
     buildNavigation();
     applyPreferences();
     setupPreferences();
@@ -3064,5 +4281,18 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     });
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', function () {
+    var ready = window.TP_CORE_VENDOR_READY || Promise.resolve();
+    ready.then(init).catch(function (error) {
+      console.error('[vendor] Core dependencies failed to load.', error);
+      var content = document.getElementById('content-area');
+      if (content) {
+        content.innerHTML =
+          '<div class="chapter-error-card">' +
+          '<h2>TechPrimer could not load</h2>' +
+          '<p>Reload the page after checking your network connection.</p>' +
+          '</div>';
+      }
+    });
+  });
 })();

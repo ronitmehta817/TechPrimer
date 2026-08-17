@@ -8,7 +8,8 @@
     "kv:create": "wrangler kv namespace create USER_STORE",
     "kv:create:preview": "wrangler kv namespace create USER_STORE --preview",
     "tail": "wrangler tail",
-    "build:mindmaps": "node scripts/build-mindmaps.mjs"
+    "build:mindmaps": "node scripts/build-mindmaps.mjs",
+    "test": "node --check public/vendor.js && node --check public/mermaid-detect.js && node --check public/app.js && node scripts/check-domain-pdf.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.87.0"
