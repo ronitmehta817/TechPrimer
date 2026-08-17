@@ -11,10 +11,16 @@
   }
 
   function addScript(src) {
-    var s = document.createElement('script');
-    s.src = src;
-    s.async = false;
-    document.head.appendChild(s);
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = false;
+      s.addEventListener('load', resolve, { once: true });
+      s.addEventListener('error', function () {
+        reject(new Error('Unable to load ' + src));
+      }, { once: true });
+      document.head.appendChild(s);
+    });
   }
 
   function addInline(type, code) {
@@ -53,12 +59,32 @@
     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/properties.min.js',
-    'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js',
+    'https://cdn.jsdelivr.net/npm/mermaid@11.16.1/dist/mermaid.min.js',
     'https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js',
   ];
-  vendorScripts.forEach(addScript);
+  var coreScriptsReady = Promise.all(vendorScripts.map(addScript));
 
-  addInline('module',
-    'import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.mjs";'
-    + 'window.Fuse = Fuse;');
+  var fuseReady = import(
+    'https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.mjs'
+  ).then(function (module) {
+    window.Fuse = module.default;
+  });
+  window.TP_CORE_VENDOR_READY = Promise.all([
+    coreScriptsReady,
+    fuseReady
+  ]);
+
+  var pdfVendorScripts = [
+    'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+    'https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js',
+    'https://cdn.jsdelivr.net/npm/svg2pdf.js@2.7.0/dist/svg2pdf.umd.min.js',
+    'https://cdn.jsdelivr.net/npm/fflate@0.8.3/umd/index.js',
+  ];
+  var pdfScriptsReady = pdfVendorScripts.reduce(function (chain, src) {
+    return chain.then(function () { return addScript(src); });
+  }, Promise.resolve());
+  window.TP_PDF_EXPORT_READY = Promise.all([
+    window.TP_CORE_VENDOR_READY,
+    pdfScriptsReady
+  ]);
 })();
