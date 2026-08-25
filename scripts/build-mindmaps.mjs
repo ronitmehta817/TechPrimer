@@ -43,6 +43,11 @@ const __dirname  = dirname(__filename);
 
 const ROOT          = resolve(__dirname, '..');
 const CONTENT_FILE  = resolve(ROOT, 'public', 'content.js');
+const DESIGN_CONTENT_FILE = resolve(ROOT, 'public', 'content', 'design.js');
+const QUESTION_CONTENT_FILE = resolve(ROOT, 'public', 'question-sections.js');
+const DIAGRAM_FILES = [
+  resolve(ROOT, 'public', 'content', 'diagrams.js'),
+];
 const OUTPUT_FILE   = resolve(ROOT, 'public', 'mindmaps.js');
 
 // Mirror constants kept identical to mindmap.js so the renderer doesn't
@@ -58,7 +63,7 @@ const SUMMARY_LEVEL = 5;
 // (sectionId, chapterId) pair the runtime ends up using after CONTENT is
 // loaded. Keep this list in sync with the DOMAINS array near the top of
 // app.js.
-const DOMAIN_PREFIXES = ['sd-', 'ms-', 'mq-', 'dp-', 'spring-'];
+const DOMAIN_PREFIXES = ['design-hld-', 'design-lld-', 'sd-', 'ms-', 'mq-', 'spring-'];
 
 function getDomainPrefix(sectionId) {
   for (let i = 0; i < DOMAIN_PREFIXES.length; i++) {
@@ -88,37 +93,57 @@ function chapterKey(sectionId, chapterId) { return sectionId + '/' + chapterId; 
 // =====================================================================
 function loadContent() {
   const src = readFileSync(CONTENT_FILE, 'utf8');
-  // content.js sets `window.DESIGN_PATTERN_SECTIONS` only if `window` exists,
-  // and declares `var DESIGN_PATTERN_SECTIONS` + `const CONTENT` at script
-  // top level. A vm script is its own scope, so we append a tiny epilogue
-  // that pulls those bindings into a context-visible bag.
+  const designSrc = readFileSync(DESIGN_CONTENT_FILE, 'utf8');
   const sandbox = { window: {}, console };
   vm.createContext(sandbox);
+  vm.runInContext(readFileSync(QUESTION_CONTENT_FILE, 'utf8'), sandbox, {
+    filename: 'question-sections.js',
+  });
+  DIAGRAM_FILES.forEach((file) => {
+    vm.runInContext(readFileSync(file, 'utf8'), sandbox, {
+      filename: file.slice(ROOT.length + 1),
+    });
+  });
+  vm.runInContext(src, sandbox, { filename: 'content.js' });
+  vm.runInContext(designSrc, sandbox, { filename: 'content/design.js' });
   vm.runInContext(
-    src + '\n;globalThis.__OUT__ = { CONTENT: typeof CONTENT !== "undefined" ? CONTENT : null, DPS: typeof DESIGN_PATTERN_SECTIONS !== "undefined" ? DESIGN_PATTERN_SECTIONS : null };',
+    'globalThis.__OUT__ = {' +
+      ' CONTENT: typeof CONTENT !== "undefined" ? CONTENT : null,' +
+      ' DESIGN: window.CONTENT_DESIGN || [],' +
+      ' BAGS: window,' +
+      ' DIAGRAMS: window.CHAPTER_DIAGRAMS || {}' +
+    '};',
     sandbox,
-    { filename: 'content.js' },
   );
   const out = sandbox.__OUT__;
   if (!out || !Array.isArray(out.CONTENT)) {
     throw new Error('Could not load CONTENT from content.js');
   }
-  return { CONTENT: out.CONTENT, DPS: out.DPS || {} };
+  return {
+    CONTENT: out.CONTENT.concat(out.DESIGN || []),
+    BAGS: out.BAGS || {},
+    DIAGRAMS: out.DIAGRAMS || {},
+  };
 }
 
 // =====================================================================
 // Step 2 — chapter -> markdown string.
 // =====================================================================
-function resolveMarkdown(chapter, dps) {
+function resolveMarkdown(chapter, bags) {
   if (typeof chapter.content === 'string' && chapter.content.length) return chapter.content;
-  if (chapter.contentVar === 'DESIGN_PATTERN_SECTIONS' && chapter.contentSection) {
-    const md = dps[chapter.contentSection];
+  if (chapter.contentVar && chapter.contentSection) {
+    const bag = bags[chapter.contentVar];
+    const md = bag && bag[chapter.contentSection];
     if (typeof md === 'string') return md;
   }
-  // contentFile / unknown contentVar: skip. Runtime will simply find no
-  // precomputed entry and silently render no recap (same as today's
-  // "chapter too sparse" path).
   return null;
+}
+
+function withSupplementalDiagram(sectionId, chapterId, markdown, diagrams) {
+  if (typeof markdown !== 'string') return markdown;
+  const diagram = diagrams[chapterKey(sectionId, chapterId)];
+  if (!diagram || markdown.indexOf(diagram) !== -1) return markdown;
+  return markdown.replace(/\s+$/, '') + '\n\n---\n\n' + diagram;
 }
 
 // =====================================================================
@@ -625,7 +650,7 @@ function fnv1a32Hex(str) {
   return ('00000000' + h.toString(16)).slice(-8);
 }
 
-function computeContentChecksum(CONTENT, DPS) {
+function computeContentChecksum(CONTENT, BAGS, DIAGRAMS) {
   // Build a stable string: section.id|normalisedChapterId|chapter.length|
   // first 64 chars for every chapter. Order-independent, deterministic,
   // ignores cosmetic whitespace at the end of a file. Uses the *normalised*
@@ -634,9 +659,10 @@ function computeContentChecksum(CONTENT, DPS) {
   const rows = [];
   CONTENT.forEach((section) => {
     (section.chapters || []).forEach((ch) => {
-      const md = resolveMarkdown(ch, DPS) || '';
-      const head = md.slice(0, 64).replace(/\s+/g, ' ');
       const cid = normaliseChapterId(section.id, ch.id);
+      const base = resolveMarkdown(ch, BAGS);
+      const md = withSupplementalDiagram(section.id, cid, base, DIAGRAMS) || '';
+      const head = md.slice(0, 64).replace(/\s+/g, ' ');
       rows.push(`${section.id}|${cid}|${md.length}|${head}`);
     });
   });
@@ -648,7 +674,7 @@ function computeContentChecksum(CONTENT, DPS) {
 // Step 5 — driver.
 // =====================================================================
 function build() {
-  const { CONTENT, DPS } = loadContent();
+  const { CONTENT, BAGS, DIAGRAMS } = loadContent();
 
   const chapters = {};
   const stats = {
@@ -664,7 +690,8 @@ function build() {
       stats.total++;
       const cid = normaliseChapterId(section.id, ch.id);
       const key = chapterKey(section.id, cid);
-      const md = resolveMarkdown(ch, DPS);
+      const base = resolveMarkdown(ch, BAGS);
+      const md = withSupplementalDiagram(section.id, cid, base, DIAGRAMS);
       if (md == null) {
         stats.skipped++;
         skippedDetail.push(`  [skip] ${key}: no inline content (contentFile or unknown contentVar)`);
@@ -680,7 +707,7 @@ function build() {
     });
   });
 
-  const checksum = computeContentChecksum(CONTENT, DPS);
+  const checksum = computeContentChecksum(CONTENT, BAGS, DIAGRAMS);
 
   const banner =
 `/* eslint-disable */
