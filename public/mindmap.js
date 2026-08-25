@@ -453,13 +453,23 @@
 
   // Same chapter -> markdown resolution the build script uses, in the
   // same order, so the row strings hash to the same value.
-  function resolveChapterMarkdown(chapter) {
-    if (typeof chapter.content === 'string' && chapter.content.length) return chapter.content;
-    if (chapter.contentVar === 'DESIGN_PATTERN_SECTIONS' && chapter.contentSection) {
-      var dps = window.DESIGN_PATTERN_SECTIONS;
-      if (dps && typeof dps[chapter.contentSection] === 'string') return dps[chapter.contentSection];
+  function resolveChapterMarkdown(sectionId, chapter) {
+    var markdown = null;
+    if (typeof chapter.content === 'string' && chapter.content.length) {
+      markdown = chapter.content;
+    } else if (chapter.contentVar && chapter.contentSection) {
+      var bag = window[chapter.contentVar];
+      if (bag && typeof bag[chapter.contentSection] === 'string') {
+        markdown = bag[chapter.contentSection];
+      }
     }
-    return null;
+    if (typeof markdown !== 'string') return null;
+    var diagrams = window.CHAPTER_DIAGRAMS || {};
+    var diagram = diagrams[sectionId + '/' + chapter.id];
+    if (diagram && markdown.indexOf(diagram) === -1) {
+      markdown = markdown.replace(/\s+$/, '') + '\n\n---\n\n' + diagram;
+    }
+    return markdown;
   }
 
   function computeChecksum(content) {
@@ -467,7 +477,7 @@
     var rows = [];
     content.forEach(function (section) {
       (section.chapters || []).forEach(function (ch) {
-        var md = resolveChapterMarkdown(ch) || '';
+        var md = resolveChapterMarkdown(section.id, ch) || '';
         var head = md.slice(0, 64).replace(/\s+/g, ' ');
         // app.js has already normalised ch.id by the time we run, so
         // ch.id here is the same form the build script's normaliser

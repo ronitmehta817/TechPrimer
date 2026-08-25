@@ -3,7 +3,7 @@
  *
  * A scroll-reactive 3D system topology rendered in the welcome hero. A central
  * iridescent hub is connected by glowing edges to domain satellite nodes
- * (System Design, Microservices, Message Queues, Spring, Design Patterns), with small data
+ * (HLD, LLD, System Design, Microservices, Message Queues, Spring), with small data
  * packets travelling along the edges in both directions. Faint sub-nodes form
  * a background mesh that hints at a wider network.
  *
@@ -34,11 +34,12 @@ const prefersReducedMotion = typeof window.matchMedia === 'function'
 
 /* Radial placement so all domain nodes stay readable around the hub. */
 const NODE_LAYOUT = [
-  { x:  0.00, y:  1.62, z:  0.50 },   // sd
-  { x: -1.54, y:  0.50, z: -0.35 },   // ms
-  { x:  1.54, y:  0.50, z: -0.35 },   // mq
-  { x: -0.95, y: -1.30, z:  0.45 },   // spring
-  { x:  0.95, y: -1.30, z:  0.45 },   // design patterns
+  { x: -0.78, y:  1.42, z:  0.45 },   // HLD
+  { x:  0.78, y:  1.42, z:  0.45 },   // LLD
+  { x: -1.62, y:  0.00, z: -0.30 },   // System Design
+  { x:  1.62, y:  0.00, z: -0.30 },   // Microservices
+  { x: -0.78, y: -1.42, z:  0.45 },   // Message Queues
+  { x:  0.78, y: -1.42, z:  0.45 },   // Spring
 ];
 
 /* Sub-nodes drift around the network as a faint background mesh. */
@@ -159,11 +160,12 @@ class NetworkScene {
      * a tooltip appears. Size scaled up vs the orbiter version so they read
      * as proper nodes, not satellites. */
     const shapes = [
-      () => new THREE.OctahedronGeometry(0.30, 0),    // sd
-      () => new THREE.TetrahedronGeometry(0.36, 0),   // ms
-      () => new THREE.DodecahedronGeometry(0.30, 0),  // mq
-      () => new THREE.IcosahedronGeometry(0.32, 0),   // spring
-      () => new THREE.BoxGeometry(0.46, 0.46, 0.46),   // design patterns
+      () => new THREE.OctahedronGeometry(0.30, 0),     // HLD
+      () => new THREE.BoxGeometry(0.46, 0.46, 0.46),  // LLD
+      () => new THREE.DodecahedronGeometry(0.30, 0),   // System Design
+      () => new THREE.TetrahedronGeometry(0.36, 0),    // Microservices
+      () => new THREE.IcosahedronGeometry(0.32, 0),    // Message Queues
+      () => new THREE.ConeGeometry(0.34, 0.55, 6),     // Spring
     ];
 
     this.domainNodes = [];

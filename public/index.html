@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Primer — Complete Guide</title>
     <meta name="description"
-        content="A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.">
+        content="A complete software engineering learning guide for HLD, Java LLD, system design, microservices, message queues, and Spring Framework.">
     <meta name="robots" content="index,follow">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b09828">
@@ -17,14 +17,14 @@
     <meta property="og:site_name" content="Tech Primer">
     <meta property="og:title" content="Tech Primer — Complete Guide">
     <meta property="og:description"
-        content="A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.">
+        content="A complete software engineering learning guide for HLD, Java LLD, system design, microservices, message queues, and Spring Framework.">
     <meta property="og:url" content="https://tech-primer.ronitmehta817.workers.dev/">
     <meta property="og:locale" content="en_US">
     <meta name="twitter:card" content="summary">
     <meta name="google-site-verification" content="gbaff8p3lqNXYEY6S2rpQyE1a8IzFkiYV627ypzEx6A" />
     <meta name="twitter:title" content="Tech Primer — Complete Guide">
     <meta name="twitter:description"
-        content="A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.">
+        content="A complete software engineering learning guide for HLD, Java LLD, system design, microservices, message queues, and Spring Framework.">
     <script>
         // Nuke any existing service worker + its caches on every page load. The old
         // caching SW traded offline support for painful cache-invalidation bugs, so
@@ -68,9 +68,9 @@
      blocking body parsing until vendors finish. Edit vendor.js to add or
      update any HTTPS dependency — index.html should never need to grow new
      https:// URLs. -->
-    <script src="vendor.js?v=20260817-domain-pdf-fast4"></script>
+    <script src="vendor.js?v=20260825-mermaid-full"></script>
 
-    <link rel="stylesheet" href="styles.css?v=20260817-domain-pdf-fast4">
+    <link rel="stylesheet" href="styles.css?v=20260825-mermaid-full">
 </head>
 
 <body class="home-page">
@@ -258,14 +258,16 @@
          `CONTENT_FULL` rename that used to live as an inline bridge here is
          now done at the top of app.js's IIFE — inline scripts can't be
          deferred, and we need this rename to happen after content.js. -->
-    <script defer src="question-sections.js?v=20260515-mindmap2"></script>
-    <script defer src="content.js?v=20260515-mindmap2"></script>
-    <script defer src="mindmaps.js?v=20260515-mindmap2"></script>
-    <script defer src="mindmap.js?v=20260515-mindmap2"></script>
-    <script defer src="mermaid-detect.js?v=20260817-domain-pdf-fast4"></script>
-    <script type="module" src="three-bg.js?v=20260515-mindmap2"></script>
-    <script type="module" src="three-welcome.js?v=20260515-mindmap2"></script>
-    <script defer src="app.js?v=20260817-domain-pdf-fast4"></script>
+    <script defer src="content/diagrams.js?v=20260825-mermaid-full"></script>
+    <script defer src="content/design-manifest.js?v=20260825-mermaid-full"></script>
+    <script defer src="question-sections.js?v=20260825-mermaid-full"></script>
+    <script defer src="content.js?v=20260825-mermaid-full"></script>
+    <script defer src="mindmaps.js?v=20260825-mermaid-full"></script>
+    <script defer src="mindmap.js?v=20260825-mermaid-full"></script>
+    <script defer src="mermaid-detect.js?v=20260825-mermaid-full"></script>
+    <script type="module" src="three-bg.js?v=20260825-mermaid-full"></script>
+    <script type="module" src="three-welcome.js?v=20260825-mermaid-full"></script>
+    <script defer src="app.js?v=20260825-mermaid-full"></script>
 </body>
 
 </html>

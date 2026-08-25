@@ -13,19 +13,21 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   var GUIDE_TITLE = 'Tech Primer';
   var GUIDE_ICON = '\uD83D\uDCDA';
   var SITE_ORIGIN = 'https://tech-primer.ronitmehta817.workers.dev/';
-  var SITE_DESCRIPTION = 'A complete software engineering learning guide for system design, microservices, message queues, Spring Framework, and design patterns.';
+  var SITE_DESCRIPTION = 'A complete software engineering learning guide for HLD, Java LLD, system design, microservices, message queues, and Spring Framework.';
 
 
   var DOMAINS = [
+    { prefix: 'design-hld-', label: 'HLD', icon: '\uD83C\uDFD7\uFE0F', desc: 'High-level architecture, distributed systems, reliability, and system design case studies.', file: 'design', colorKey: 'hld', category: 'design' },
+    { prefix: 'design-lld-', label: 'LLD', icon: '\uD83E\uDDE9', desc: 'Object-oriented design, Java 17, design patterns, and implementation case studies.', file: 'design', colorKey: 'lld', category: 'design' },
     { prefix: 'sd-', label: 'System Design', icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd', category: 'arch' },
     { prefix: 'ms-', label: 'Microservices', icon: '\uD83D\uDD17', desc: 'Architecture patterns, communication, data management, resilience, and deployment.', file: 'ms', category: 'arch' },
     { prefix: 'mq-', label: 'Message Queues', icon: '\uD83D\uDCEC', desc: 'Messaging patterns, reliability, Kafka, RabbitMQ, event-driven architecture.', file: 'mq', category: 'arch' },
-    { prefix: 'dp-', label: 'Design Patterns', icon: '\uD83E\uDDE9', desc: 'Creational, structural, and behavioral object-oriented design patterns in Java.', file: 'dp', category: 'code' },
     { prefix: 'spring-', label: 'Spring Framework', icon: '\uD83C\uDF31', desc: 'Spring Core, Spring Boot, AOP, JDBC, Hibernate, and MVC.', file: 'spring', category: 'code' }
   ];
 
   // Domain categories drive the grouped welcome page layout.
   var DOMAIN_CATEGORIES = [
+    { key: 'design', label: 'Design & Interviews', desc: 'Separate guided paths for high-level and low-level design.' },
     { key: 'arch', label: 'Systems & Architecture', desc: 'High-level architecture, scalability, and distributed systems.' },
     { key: 'code', label: 'Code & Frameworks', desc: 'Object-oriented design and the Spring ecosystem.' }
   ];
@@ -189,12 +191,23 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     return chapterId;
   }
 
+  function withSupplementalDiagram(markdown, diagram) {
+    if (typeof markdown !== 'string' || !diagram || markdown.indexOf(diagram) !== -1) return markdown;
+    return markdown.replace(/\s+$/, '') + '\n\n---\n\n' + diagram;
+  }
+
   function normaliseSectionIds(sections) {
     if (!Array.isArray(sections)) return sections;
     sections.forEach(function (sec) {
       if (!sec || !Array.isArray(sec.chapters)) return;
       sec.chapters.forEach(function (ch) {
-        if (ch && typeof ch.id === 'string') ch.id = normaliseChapterId(sec.id, ch.id);
+        if (!ch || typeof ch.id !== 'string') return;
+        ch.id = normaliseChapterId(sec.id, ch.id);
+        var diagrams = (typeof window !== 'undefined') ? window.CHAPTER_DIAGRAMS : null;
+        ch._supplementalDiagram = diagrams ? diagrams[sec.id + '/' + ch.id] : null;
+        if (ch._supplementalDiagram && typeof ch.content === 'string') {
+          ch.content = withSupplementalDiagram(ch.content, ch._supplementalDiagram);
+        }
       });
     });
     return sections;
@@ -309,6 +322,65 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   function userPrefixFor(sub) { return STORAGE_PFX + 'u:' + sub + ':'; }
 
+  function resolveLegacyDesignRoute(sectionId, chapterId) {
+    var routes = (typeof window !== 'undefined') ? window.DESIGN_LEGACY_ROUTES : null;
+    if (!routes) return null;
+    var target = routes[String(sectionId || '') + '/' + String(chapterId || '')];
+    return Array.isArray(target) && target.length === 2
+      ? { sectionId: target[0], chapterId: target[1] }
+      : null;
+  }
+
+  function migrateDesignSnapshot(snapshot) {
+    snapshot = snapshot || {};
+    var bookmarks = Object.assign({}, snapshot.bookmarks || {});
+    var notes = Object.assign({}, snapshot.notes || {});
+    var playlists = Array.isArray(snapshot.playlists) ? snapshot.playlists.slice() : [];
+    var lastRead = snapshot.lastRead || null;
+
+    Object.keys(bookmarks).forEach(function (key) {
+      var slash = key.indexOf('/');
+      if (slash < 1) return;
+      var target = resolveLegacyDesignRoute(key.slice(0, slash), key.slice(slash + 1));
+      if (!target) return;
+      var nextKey = target.sectionId + '/' + target.chapterId;
+      var current = bookmarks[nextKey];
+      if (!current || (bookmarks[key].t || 0) >= (current.t || 0)) {
+        bookmarks[nextKey] = Object.assign({}, bookmarks[key], { sid: target.sectionId });
+      }
+      delete bookmarks[key];
+    });
+
+    Object.keys(notes).forEach(function (key) {
+      var slash = key.indexOf('/');
+      if (slash < 1) return;
+      var target = resolveLegacyDesignRoute(key.slice(0, slash), key.slice(slash + 1));
+      if (!target) return;
+      var nextKey = target.sectionId + '/' + target.chapterId;
+      if (!notes[nextKey]) notes[nextKey] = notes[key];
+      delete notes[key];
+    });
+
+    playlists = playlists.map(function (playlist) {
+      if (!playlist || !Array.isArray(playlist.items)) return playlist;
+      return Object.assign({}, playlist, {
+        items: playlist.items.map(function (item) {
+          var target = resolveLegacyDesignRoute(item && item.s, item && item.c);
+          return target
+            ? Object.assign({}, item, { s: target.sectionId, c: target.chapterId })
+            : item;
+        })
+      });
+    });
+
+    if (lastRead) {
+      var target = resolveLegacyDesignRoute(lastRead.s, lastRead.c);
+      if (target) lastRead = Object.assign({}, lastRead, { s: target.sectionId, c: target.chapterId });
+    }
+
+    return { bookmarks: bookmarks, notes: notes, playlists: playlists, lastRead: lastRead };
+  }
+
   var Store = {
     pfx: STORAGE_PFX,
     _legacyPfx: STORAGE_PFX,
@@ -364,12 +436,12 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         try { var v = localStorage.getItem(pfx + k); return v ? JSON.parse(v) : d; }
         catch (e) { return d; }
       }
-      return {
+      return migrateDesignSnapshot({
         bookmarks: read('bookmarks', {}),
         notes: read('notes', {}),
         playlists: read('playlists', []),
         lastRead: read('last-read', null)
-      };
+      });
     },
 
     _writeSnapshotToPrefix: function (pfx, snap) {
@@ -386,7 +458,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     // (no `t` today) we union local + remote, with remote winning on
     // collision since it is the cross-device source of truth.
     _mergeSnapshots: function (local, remote) {
-      local = local || {}; remote = remote || {};
+      local = migrateDesignSnapshot(local);
+      remote = migrateDesignSnapshot(remote);
       var merged = { bookmarks: {}, notes: {}, playlists: [], lastRead: null };
 
       var lb = local.bookmarks || {}, rb = remote.bookmarks || {};
@@ -605,6 +678,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     // user can sign back in later and pick up where they left off.
     deactivateSync: function () { this.pfx = this._legacyPfx; },
 
+    migrateActiveDesignRoutes: function () {
+      this._writeSnapshotToPrefix(this.pfx, this._readSnapshotFromPrefix(this.pfx));
+    },
+
     // Cross-tab sync within the same browser: when another tab on this
     // origin writes to a key under the active prefix, repaint UI here.
     _handleStorageEvent: function (e) {
@@ -623,8 +700,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     flatChapters: [],
     activeDomainFilter: null,
     loadedDomains: {},
+    loadingDomainFiles: {},
     contentLoaded: false,
     fuseInstance: null,
+    searchContentLoading: false,
+    searchPendingQuery: '',
     mermaidReady: false
   };
   var dom = {};
@@ -651,11 +731,30 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       return;
     }
 
+    var fileKey = domain.file;
+    if (state.loadingDomainFiles[fileKey]) {
+      state.loadingDomainFiles[fileKey].push({ prefix: prefix, cb: cb });
+      return;
+    }
+    state.loadingDomainFiles[fileKey] = [{ prefix: prefix, cb: cb }];
+
+    function finishFileLoad(succeeded) {
+      var requests = state.loadingDomainFiles[fileKey] || [];
+      delete state.loadingDomainFiles[fileKey];
+      if (succeeded && window[varName]) {
+        requests.forEach(function (request) {
+          mergeDomainContent(window[varName], request.prefix);
+        });
+      }
+      requests.forEach(function (request) {
+        if (request.cb) request.cb();
+      });
+    }
+
     var script = document.createElement('script');
     script.src = 'content/' + domain.file + '.js';
     script.onload = function () {
-      if (window[varName]) mergeDomainContent(window[varName], prefix);
-      if (cb) cb();
+      finishFileLoad(true);
     };
     script.onerror = function () {
       if (!state.contentLoaded && window.CONTENT_FALLBACK) {
@@ -663,7 +762,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         state.contentLoaded = true;
         DOMAINS.forEach(function (d) { state.loadedDomains[d.prefix] = true; });
       }
-      if (cb) cb();
+      finishFileLoad(false);
     };
     document.head.appendChild(script);
   }
@@ -677,6 +776,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         exists.chapters = sec.chapters;
         exists.title = sec.title;
         exists.icon = sec.icon;
+        exists.description = sec.description || '';
       }
     });
     state.loadedDomains[prefix] = true;
@@ -696,24 +796,56 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function initContentFromManifest() {
+    function toStub(section) {
+      return {
+        id: section.id,
+        title: section.title,
+        icon: section.icon,
+        description: section.description || '',
+        chapters: section.chapters.map(function (chapter) {
+          return {
+            id: chapter.id,
+            title: chapter.title,
+            parent: chapter.parent || undefined,
+            content: ''
+          };
+        })
+      };
+    }
+
     if (window.CONTENT_FULL && Array.isArray(window.CONTENT_FULL)) {
       CONTENT = normaliseSectionIds(window.CONTENT_FULL);
+      var extraManifest = window.CONTENT_DESIGN_MANIFEST || [];
+      extraManifest.forEach(function (section) {
+        if (!CONTENT.some(function (existing) { return existing.id === section.id; })) {
+          CONTENT.push(toStub(section));
+        }
+      });
       state.contentLoaded = true;
-      DOMAINS.forEach(function (d) { state.loadedDomains[d.prefix] = true; });
+      DOMAINS.forEach(function (domain) {
+        state.loadedDomains[domain.prefix] = getContentForDomain(domain.prefix).some(function (section) {
+          return section.chapters.some(function (chapter) {
+            return !!(chapter.content || chapter.contentVar || chapter.contentFile);
+          });
+        });
+      });
       return;
     }
     if (window.CONTENT_MANIFEST) {
-      CONTENT = normaliseSectionIds(window.CONTENT_MANIFEST.map(function (s) {
-        return {
-          id: s.id, title: s.title, icon: s.icon, description: s.description || '', chapters: s.chapters.map(function (ch) {
-            return { id: ch.id, title: ch.title, parent: ch.parent || undefined, content: '' };
-          })
-        };
-      }));
+      CONTENT = normaliseSectionIds(window.CONTENT_MANIFEST.map(toStub));
     }
   }
 
   // ===================== FUSE SEARCH =====================
+  function searchableText(markdown) {
+    return String(markdown || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/```[\s\S]*?```/g, function (block) { return block.replace(/```[a-z0-9-]*/gi, ' '); })
+      .replace(/[#*`\[\]()|\->\~\_\!\^]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function initFuse() {
     if (!window.Fuse) return;
     var items = [];
@@ -724,7 +856,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
           sectionTitle: section.title,
           chapterId: ch.id,
           chapterTitle: ch.title,
-          contentSnippet: (ch.content || '').replace(/[#*`\[\]()|\->\~\_\!\^]/g, ' ').substring(0, 3000)
+          contentSnippet: searchableText(ch.content)
         });
       });
     });
@@ -1026,6 +1158,69 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       ]);
       p.parentNode.replaceChild(block, p);
     });
+  }
+
+  function enhanceInterviewAnswers() {
+    var md = dom.contentArea.querySelector('.md-content');
+    if (!md) return;
+    var answers = Array.from(md.querySelectorAll('details.answer'));
+    if (!answers.length) return;
+    var interviewHeading = Array.from(md.querySelectorAll('h2')).find(function (heading) {
+      return heading.textContent.trim().toLowerCase() === 'interview questions';
+    });
+
+    var toolbar = h('div', {
+      class: 'answer-toolbar',
+      role: 'group',
+      'aria-label': 'Interview answer controls'
+    });
+    var status = h('span', {
+      class: 'answer-toolbar-status',
+      'aria-live': 'polite'
+    });
+
+    function updateStatus() {
+      var openCount = answers.filter(function (answer) { return answer.open; }).length;
+      status.textContent = openCount + ' of ' + answers.length + ' answers revealed';
+    }
+
+    var revealAll = h('button', {
+      class: 'answer-toolbar-btn',
+      type: 'button',
+      text: 'Reveal all',
+      on: {
+        click: function () {
+          answers.forEach(function (answer) { answer.open = true; });
+          updateStatus();
+        }
+      }
+    });
+    var hideAll = h('button', {
+      class: 'answer-toolbar-btn',
+      type: 'button',
+      text: 'Hide all',
+      on: {
+        click: function () {
+          answers.forEach(function (answer) { answer.open = false; });
+          updateStatus();
+          if (interviewHeading) interviewHeading.scrollIntoView({ block: 'start' });
+        }
+      }
+    });
+
+    answers.forEach(function (answer) {
+      answer.addEventListener('toggle', updateStatus);
+      var summary = answer.querySelector('summary');
+      if (summary && !summary.getAttribute('aria-label')) {
+        summary.setAttribute('aria-label', summary.textContent.trim());
+      }
+    });
+
+    toolbar.appendChild(status);
+    toolbar.appendChild(h('div', { class: 'answer-toolbar-actions' }, [revealAll, hideAll]));
+    if (interviewHeading) interviewHeading.parentNode.insertBefore(toolbar, interviewHeading.nextSibling);
+    else answers[0].parentNode.insertBefore(toolbar, answers[0]);
+    updateStatus();
   }
 
   // ===================== MIND MAP MODAL =====================
@@ -1950,7 +2145,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
           text = parts.join('\n\n---\n\n');
         }
         if (typeof text === 'string' && text.length) {
-          chapter.content = text;
+          chapter.content = withSupplementalDiagram(text, chapter._supplementalDiagram);
           return chapter.content;
         }
       }
@@ -2103,7 +2298,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     }
     fetchMarkdownFile(chapter.contentFile, function (err, text) {
       if (err) { cb(err); return; }
-      chapter.content = extractMarkdownSection(text, chapter.contentSection);
+      chapter.content = withSupplementalDiagram(
+        extractMarkdownSection(text, chapter.contentSection),
+        chapter._supplementalDiagram
+      );
       cb(null, chapter.content);
     });
   }
@@ -2265,6 +2463,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     highlightCode();
     wrapSubSections();
     enhanceContent();
+    enhanceInterviewAnswers();
     parseCallouts();
     addCodeHeaders();
     wrapTables();
@@ -2373,7 +2572,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   function findMatchContext(content, terms, contextLen) {
-    var strip = content.replace(/[#*`\[\]()|\->\~\_\!\^]/g, ' ').replace(/\s+/g, ' ').trim();
+    var strip = searchableText(content);
     var lower = strip.toLowerCase();
     var bestIdx = -1;
     for (var i = 0; i < terms.length; i++) {
@@ -3901,7 +4100,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (window.AetherWelcome && window.AetherWelcome.mount) {
       try {
         var domainSeeds = DOMAINS.map(function (d) {
-          var cssVar = '--domain-' + d.file;
+          var cssVar = '--domain-' + (d.colorKey || d.file);
           var col = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim() || '#b09828';
           return { prefix: d.prefix, label: d.label, color: col };
         });
@@ -3979,6 +4178,13 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       replaceHistory = true;
     }
 
+    var migrated = resolveLegacyDesignRoute(sid, cid);
+    if (migrated) {
+      sid = migrated.sectionId;
+      cid = migrated.chapterId;
+      replaceHistory = true;
+    }
+
     var sec = CONTENT.find(function (s) { return s.id === sid; });
     if (sec) {
       var domain = getDomain(sid);
@@ -4032,6 +4238,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     configureMarked();
     initTheme();
     initContentFromManifest();
+    Store.migrateActiveDesignRoutes();
     if (window.TP_PDF_EXPORT_READY) {
       window.TP_PDF_EXPORT_READY
         .then(function () { setDomainPdfButtonsDisabled(false); })
@@ -4059,14 +4266,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       idle(function () { navRebuildScheduled = false; buildNavigation(); });
     }
 
-    ensureAllContentLoaded(function () {
+    initFuse();
+    prefetchExternalChapters(function () {
       scheduleNavRebuild();
       initFuse();
-      prefetchExternalChapters(function () {
-        scheduleNavRebuild();
-        initFuse();
-      });
-      if (!state.activeChapter && !handleRoute()) showWelcome();
     });
 
     if (!handleRoute()) showWelcome();
@@ -4093,7 +4296,29 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     function onSearch(e) {
       clearTimeout(searchTimer);
       var v = e.target.value;
-      searchTimer = setTimeout(function () { handleSearch(v); }, 200);
+      state.searchPendingQuery = v;
+      searchTimer = setTimeout(function () {
+        if (v.trim().length < 2) {
+          handleSearch(v);
+          return;
+        }
+        var pendingDomains = DOMAINS.some(function (domain) { return !state.loadedDomains[domain.prefix]; });
+        if (!pendingDomains) {
+          handleSearch(v);
+          return;
+        }
+        if (state.searchContentLoading) return;
+        state.searchContentLoading = true;
+        dom.searchResults.innerHTML = '<div class="search-no-results">Loading the full study index\u2026</div>';
+        dom.searchResults.classList.add('active');
+        syncSearchBlur(true);
+        ensureAllContentLoaded(function () {
+          state.searchContentLoading = false;
+          initFuse();
+          buildNavigation();
+          handleSearch(state.searchPendingQuery);
+        });
+      }, 200);
     }
     dom.searchInput.addEventListener('input', onSearch);
     if (dom.searchInputMobile) dom.searchInputMobile.addEventListener('input', onSearch);

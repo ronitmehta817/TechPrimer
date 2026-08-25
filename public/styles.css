@@ -93,11 +93,12 @@
     --callout-warning-border: #eab308;
     --callout-danger-bg: rgba(239, 68, 68, 0.08);
     --callout-danger-border: #ef4444;
-    --domain-sd: #2563eb;
+    --domain-hld: #2563eb;
+    --domain-lld: #f97316;
+    --domain-sd: #0f766e;
     --domain-ms: #7c3aed;
     --domain-mq: #059669;
     --domain-spring: #16a34a;
-    --domain-dp: #f97316;
 }
 
 [data-theme="dark"] {
@@ -172,11 +173,12 @@
     --callout-warning-border: #e6db74;
     --callout-danger-bg: rgba(249, 38, 114, 0.1);
     --callout-danger-border: #f92672;
-    --domain-sd: #66d9ef;
+    --domain-hld: #66d9ef;
+    --domain-lld: #fd971f;
+    --domain-sd: #2dd4bf;
     --domain-ms: #ae81ff;
     --domain-mq: #a6e22e;
     --domain-spring: #a6e22e;
-    --domain-dp: #fd971f;
 }
 
 /* ===== Reading Preferences ===== */
@@ -3567,11 +3569,8 @@ body::after {
     white-space: nowrap;
 }
 
-/* ===== Collapsible Solution (<details class="solution">) =====
- * Used by Practice Exercises in chapters. Solution stays hidden until the user
- * clicks the summary. Same glass treatment as the other content surfaces, with
- * a chevron rotation and subtle reveal animation when [open]. */
-.md-content details.solution {
+/* ===== Collapsible solutions and interview answers ===== */
+.md-content details:is(.solution, .answer) {
     margin: 8px 0 16px;
     background: var(--liquid-shell-strong);
     border: 1px solid var(--liquid-border-strong);
@@ -3583,11 +3582,11 @@ body::after {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.md-content details.solution:hover {
+.md-content details:is(.solution, .answer):hover {
     border-color: color-mix(in srgb, var(--accent) 35%, var(--liquid-border-strong) 65%);
 }
 
-.md-content details.solution>summary {
+.md-content details:is(.solution, .answer)>summary {
     cursor: pointer;
     user-select: none;
     list-style: none;
@@ -3601,11 +3600,11 @@ body::after {
     transition: color 0.2s ease, background 0.2s ease;
 }
 
-.md-content details.solution>summary::-webkit-details-marker {
+.md-content details:is(.solution, .answer)>summary::-webkit-details-marker {
     display: none;
 }
 
-.md-content details.solution>summary::before {
+.md-content details:is(.solution, .answer)>summary::before {
     content: '';
     flex-shrink: 0;
     width: 0;
@@ -3616,46 +3615,126 @@ body::after {
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.md-content details.solution[open]>summary::before {
+.md-content details:is(.solution, .answer)[open]>summary::before {
     transform: rotate(90deg);
 }
 
-.md-content details.solution[open]>summary {
+.md-content details:is(.solution, .answer)[open]>summary {
     color: var(--text-primary);
     border-bottom: 1px solid var(--liquid-border);
     background: color-mix(in srgb, var(--accent-light) 55%, transparent 45%);
 }
 
-.md-content details.solution>summary:focus-visible {
+.md-content details:is(.solution, .answer)>summary:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: -2px;
 }
 
-.md-content details.solution>summary:hover {
+.md-content details:is(.solution, .answer)>summary:hover {
     color: var(--accent-hover);
 }
 
 /* All non-summary children get a horizontal pad + a small reveal animation when [open]. */
-.md-content details.solution[open]>*:not(summary) {
+.md-content details:is(.solution, .answer)[open]>*:not(summary) {
     padding-left: 18px;
     padding-right: 18px;
     animation: fadeIn 0.3s ease both;
 }
 
-.md-content details.solution[open]>*:not(summary):first-of-type {
+.md-content details:is(.solution, .answer)[open]>*:not(summary):first-of-type {
     padding-top: 14px;
     margin-top: 0;
 }
 
-.md-content details.solution[open]>*:not(summary):last-child {
+.md-content details:is(.solution, .answer)[open]>*:not(summary):last-child {
     padding-bottom: 14px;
     margin-bottom: 0;
 }
 
 /* Tables / images inside the details get their own wrapper from JS - keep their margins clean. */
-.md-content details.solution[open] .table-wrapper,
-.md-content details.solution[open] .img-skeleton-wrap {
+.md-content details:is(.solution, .answer)[open] .table-wrapper,
+.md-content details:is(.solution, .answer)[open] .img-skeleton-wrap {
     margin-bottom: 14px;
+}
+
+.md-content details.answer {
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--liquid-border-strong) 76%);
+}
+
+.answer-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 10px 0 14px;
+    padding: 8px 9px 8px 14px;
+    background: var(--liquid-shell);
+    border: 1px solid var(--liquid-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--liquid-shadow);
+    backdrop-filter: blur(6px) saturate(120%);
+    -webkit-backdrop-filter: blur(6px) saturate(120%);
+}
+
+.answer-toolbar-status {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.answer-toolbar-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.answer-toolbar-btn {
+    position: relative;
+    min-height: 32px;
+    padding: 6px 12px;
+    overflow: hidden;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--liquid-shell);
+    border: 1px solid var(--liquid-border);
+    border-radius: 999px;
+    box-shadow: var(--liquid-shadow);
+    cursor: pointer;
+    transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.answer-toolbar-btn::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    left: 1px;
+    height: 58%;
+    border-radius: inherit;
+    background:
+        radial-gradient(circle at 12% 14%, var(--liquid-specular) 0%, transparent 16%),
+        linear-gradient(180deg, var(--liquid-specular) 0%, var(--liquid-specular-soft) 52%, transparent 100%);
+    pointer-events: none;
+}
+
+.answer-toolbar-btn:hover {
+    color: var(--accent);
+    background: var(--liquid-shell-strong);
+    border-color: var(--liquid-border-strong);
+    transform: translateY(-1px);
+}
+
+.answer-toolbar-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+    .answer-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
 /* ===== Sub-sections & Definitions ===== */
