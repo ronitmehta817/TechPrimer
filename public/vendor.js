@@ -36,7 +36,8 @@
   addLink({
     rel: 'stylesheet',
     href: 'https://fonts.googleapis.com/css2?'
-        + 'family=Inter:wght@300;400;500;600;700;800'
+        + 'family=Manrope:wght@300..800'
+        + '&family=Noto+Serif+Display:ital,wdth,wght@1,75,300..500'
         + '&family=JetBrains+Mono:wght@400;500;600'
         + '&display=swap',
   });

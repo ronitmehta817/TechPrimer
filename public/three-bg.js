@@ -21,33 +21,30 @@
 
 import * as THREE from 'three';
 
-/* Two-tone constellation: gold + blue, randomly assigned per node / edge /
+/* Two-tone constellation: orange + aqua, randomly assigned per node / edge /
  * star / globe. Each tone is deep on cream and bright on dark so contrast
  * stays right in both modes. Hero star variants are brighter shades of the
- * same hue. The domain palette stays unchanged so the globe pulse points
- * keep their per-domain identity. */
+ * same hue. */
 const PALETTE = {
   light: {
-    bg:       0xf8f1e9,
-    /* tone A = dark gold; tone B = dark navy. Both visible on cream. */
-    toneA:        0xa8741a,
-    toneB:        0x1f4a8b,
-    toneAHero:    0xd09028,
-    toneBHero:    0x3068b0,
-    /* sd, ms, mq, spring — saturated for the globe pulse points only. */
-    domains:      [0x2563eb, 0x7c3aed, 0x059669, 0x16a34a],
+    bg:       0xf5f2ec,
+    toneA:        0xb66f00,
+    toneB:        0x007f71,
+    toneAHero:    0xd78b00,
+    toneBHero:    0x009f8d,
+    domains:      [0xc66a00, 0x00796b, 0x3b6fd8, 0x7c4ddb],
     edgeOpacity:  0.55,
     nodeAlpha:    0.85,
     starAlpha:    0.55,
     globeWireAlpha: 0.60,
   },
   dark: {
-    bg:       0x1e1e1e,
-    toneA:        0xd0b344,
-    toneB:        0xf2df9b,
-    toneAHero:    0xfff0b0,
-    toneBHero:    0xfff7d6,
-    domains:      [0xd0b344, 0xf2df9b, 0xffe8a3, 0xfff7d6],
+    bg:       0x03060d,
+    toneA:        0xffa800,
+    toneB:        0x00ffe0,
+    toneAHero:    0xffc04a,
+    toneBHero:    0x73ffed,
+    domains:      [0xffa800, 0x00ffe0, 0x6ea8ff, 0xb388ff],
     edgeOpacity:  0.70,
     nodeAlpha:    0.95,
     starAlpha:    0.80,
@@ -804,7 +801,7 @@ class AmbientBg {
     /* Clamp delta so a backgrounded tab can't catapult animations on resume. */
     const dt = Math.min((now - this._tLast) / 1000, 0.05);
     this._tLast = now;
-    const motion = prefersReducedMotion ? 0.2 : 1.0;
+    const motion = prefersReducedMotion ? 0 : 1.0;
 
     /* Smooth scroll. The network's Y rotation is purely scroll-driven —
      * absolute scrollY in pixels mapped to radians (full revolution per

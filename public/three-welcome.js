@@ -24,8 +24,8 @@
 import * as THREE from 'three';
 
 const PALETTE = {
-  light: { core: 0xffffff, rim: 0xb09828, warm: 0xfd971f, edge: 0xb09828, packet: 0xffd277, sub: 0x9b8c6e },
-  dark:  { core: 0xfff7e0, rim: 0xd0b344, warm: 0xff8000, edge: 0xd0b344, packet: 0xfff0b0, sub: 0x6a6354 },
+  light: { core: 0xffffff, rim: 0xc97f00, warm: 0x007f71, edge: 0xc97f00, packet: 0x00a690, sub: 0x65706f },
+  dark:  { core: 0xf5f6f6, rim: 0xffa800, warm: 0x00ffe0, edge: 0xffa800, packet: 0x73ffed, sub: 0x566164 },
 };
 
 const prefersReducedMotion = typeof window.matchMedia === 'function'
@@ -413,7 +413,7 @@ class NetworkScene {
     const t = (now - this._tStart) / 1000;
     const dt = Math.min((now - this._tLast) / 1000, 0.05);
     this._tLast = now;
-    const motion = prefersReducedMotion ? 0.25 : 1.0;
+    const motion = prefersReducedMotion ? 0 : 1.0;
 
     /* Smooth pointer + scroll. */
     this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.08;
@@ -447,8 +447,8 @@ class NetworkScene {
       for (const n of this.domainNodes) {
         const bp = n.basePos;
         n.mesh.position.x = bp.x;
-        n.mesh.position.y = bp.y + Math.sin(t * 0.9 + bp.x) * 0.05;
-        n.mesh.position.z = bp.z + Math.cos(t * 0.7 + bp.y) * 0.05;
+        n.mesh.position.y = bp.y + Math.sin(t * 0.9 * motion + bp.x) * 0.05 * motion;
+        n.mesh.position.z = bp.z + Math.cos(t * 0.7 * motion + bp.y) * 0.05 * motion;
         n.mesh.rotation.x += dt * n.idleSpinSpeed * 0.5 * motion;
         n.mesh.rotation.y += dt * n.idleSpinSpeed * motion;
       }
@@ -457,8 +457,8 @@ class NetworkScene {
     /* Sub-nodes drift slightly so the background mesh feels alive. */
     if (this.subNodes) {
       for (const s of this.subNodes) {
-        s.mesh.position.x = s.base.x + Math.sin(t * 0.3 + s.phase) * 0.08;
-        s.mesh.position.y = s.base.y + Math.cos(t * 0.4 + s.phase) * 0.08;
+        s.mesh.position.x = s.base.x + Math.sin(t * 0.3 * motion + s.phase) * 0.08 * motion;
+        s.mesh.position.y = s.base.y + Math.cos(t * 0.4 * motion + s.phase) * 0.08 * motion;
       }
     }
 
@@ -569,6 +569,7 @@ window.AetherWelcome = {
     const size = (options && options.size) || 320;
     const canvas = document.createElement('canvas');
     canvas.className = 'welcome-3d-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
     canvas.width = size;
     canvas.height = size;
     canvas.style.width = size + 'px';

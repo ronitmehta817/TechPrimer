@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -9,8 +9,8 @@
         content="A complete software engineering learning guide for HLD, Java LLD, system design, microservices, message queues, and Spring Framework.">
     <meta name="robots" content="index,follow">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#b09828">
-    <meta name="theme-color" content="#1e1e1e" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f1f1ed">
+    <meta name="theme-color" content="#010204" media="(prefers-color-scheme: dark)">
     <meta name="application-name" content="Tech Primer">
     <meta name="apple-mobile-web-app-title" content="Tech Primer">
     <meta property="og:type" content="website">
@@ -71,9 +71,18 @@
     <script src="vendor.js?v=20260825-mermaid-full"></script>
 
     <link rel="stylesheet" href="styles.css?v=20260825-mermaid-full">
+    <link rel="stylesheet" href="portfolio-theme.css?v=20261031-shader">
 </head>
 
 <body class="home-page">
+    <!--
+    THESIS: A software-engineering field guide wearing the designer portfolio's own animated gradient, with the original TechPrimer layout left untouched.
+    OWN-WORLD: The portfolio's WebGL sky (navy hero, teal/plum/gold/orange mesh, amber/teal contact) under film grain; black glass with white hairlines; flat orange and aqua accents.
+    STORY: Choose a colour-coded discipline, then read on black glass while the sky moves through the portfolio's palettes with reading progress.
+    FIRST VIEWPORT: The original centred welcome on the navy hero sky: white title with an orange italic "Primer", statistics, then the tinted domain cards.
+    FORM: Colour-and-material reskin of the supplied designer-portfolio reference; geometry stays in styles.css; seed key portfolio-reference.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+    -->
     <canvas id="bg-3d-canvas" aria-hidden="true"></canvas> 
     <svg style="position:absolute;width:0;height:0" aria-hidden="true">
         <filter id="water-droplets">
@@ -209,7 +218,9 @@
     <!-- Account dropdown (populated by app.js when signed in) -->
     <div class="account-dropdown" id="account-dropdown">
         <div class="acct-header">
-            <img class="acct-avatar" id="acct-avatar" alt="" referrerpolicy="no-referrer">
+            <img class="acct-avatar" id="acct-avatar"
+                src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt=""
+                referrerpolicy="no-referrer">
             <div class="acct-meta">
                 <div class="acct-name" id="acct-name"></div>
                 <div class="acct-email" id="acct-email"></div>
@@ -258,6 +269,7 @@
          `CONTENT_FULL` rename that used to live as an inline bridge here is
          now done at the top of app.js's IIFE — inline scripts can't be
          deferred, and we need this rename to happen after content.js. -->
+    <script defer src="nebula-bg.js?v=20261031-shader"></script>
     <script defer src="content/diagrams.js?v=20260825-mermaid-full"></script>
     <script defer src="content/design-manifest.js?v=20260825-mermaid-full"></script>
     <script defer src="question-sections.js?v=20260825-mermaid-full"></script>
