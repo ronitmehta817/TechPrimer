@@ -17,12 +17,12 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
 
   var DOMAINS = [
-    { prefix: 'design-hld-', label: 'HLD', icon: '\uD83C\uDFD7\uFE0F', desc: 'High-level architecture, distributed systems, reliability, and system design case studies.', file: 'design', colorKey: 'hld', category: 'design' },
-    { prefix: 'design-lld-', label: 'LLD', icon: '\uD83E\uDDE9', desc: 'Object-oriented design, Java 17, design patterns, and implementation case studies.', file: 'design', colorKey: 'lld', category: 'design' },
-    { prefix: 'sd-', label: 'System Design', icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd', category: 'arch' },
-    { prefix: 'ms-', label: 'Microservices', icon: '\uD83D\uDD17', desc: 'Architecture patterns, communication, data management, resilience, and deployment.', file: 'ms', category: 'arch' },
-    { prefix: 'mq-', label: 'Message Queues', icon: '\uD83D\uDCEC', desc: 'Messaging patterns, reliability, Kafka, RabbitMQ, event-driven architecture.', file: 'mq', category: 'arch' },
-    { prefix: 'spring-', label: 'Spring Framework', icon: '\uD83C\uDF31', desc: 'Spring Core, Spring Boot, AOP, JDBC, Hibernate, and MVC.', file: 'spring', category: 'code' }
+    { prefix: 'design-hld-', label: 'HLD', mark: 'HLD', icon: '\uD83C\uDFD7\uFE0F', desc: 'High-level architecture, distributed systems, reliability, and system design case studies.', file: 'design', colorKey: 'hld', category: 'design' },
+    { prefix: 'design-lld-', label: 'LLD', mark: 'LLD', icon: '\uD83E\uDDE9', desc: 'Object-oriented design, Java 17, design patterns, and implementation case studies.', file: 'design', colorKey: 'lld', category: 'design' },
+    { prefix: 'sd-', label: 'System Design', mark: 'SD', icon: '\uD83C\uDFDB\uFE0F', desc: 'System design fundamentals, building blocks, scalability, reliability, and case studies.', file: 'sd', category: 'arch' },
+    { prefix: 'ms-', label: 'Microservices', mark: 'MS', icon: '\uD83D\uDD17', desc: 'Architecture patterns, communication, data management, resilience, and deployment.', file: 'ms', category: 'arch' },
+    { prefix: 'mq-', label: 'Message Queues', mark: 'MQ', icon: '\uD83D\uDCEC', desc: 'Messaging patterns, reliability, Kafka, RabbitMQ, event-driven architecture.', file: 'mq', category: 'arch' },
+    { prefix: 'spring-', label: 'Spring Framework', mark: 'SP', icon: '\uD83C\uDF31', desc: 'Spring Core, Spring Boot, AOP, JDBC, Hibernate, and MVC.', file: 'spring', category: 'code' }
   ];
 
   // Domain categories drive the grouped welcome page layout.
@@ -876,13 +876,14 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   // ===================== THEME =====================
   function initTheme() {
     var saved = localStorage.getItem(THEME_KEY);
-    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+    applyTheme(saved || 'dark');
   }
 
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(THEME_KEY, theme);
+    var themeMeta = document.head.querySelector('meta[name="theme-color"]:not([media])');
+    if (themeMeta) themeMeta.setAttribute('content', theme === 'dark' ? '#010204' : '#f1f1ed');
     var sun = dom.themeToggle && dom.themeToggle.querySelector('.sun-icon');
     var moon = dom.themeToggle && dom.themeToggle.querySelector('.moon-icon');
     if (sun && moon) {
@@ -2677,10 +2678,9 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         var y = e.clientY - rect.top;
         var cx = rect.width / 2;
         var cy = rect.height / 2;
-        var rotX = ((cy - y) / cy) * 12;
-        var rotY = ((x - cx) / cx) * 12;
-        card.style.transform = 'perspective(800px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateZ(8px) scale(1.03)';
-        card.style.boxShadow = '0 ' + Math.round(20 + Math.abs(rotX)) + 'px ' + Math.round(40 + Math.abs(rotY)) + 'px rgba(0,0,0,0.18)';
+        var rotX = ((cy - y) / cy) * 2.5;
+        var rotY = ((x - cx) / cx) * 2.5;
+        card.style.transform = 'perspective(1000px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateY(-4px)';
       });
       card.addEventListener('mouseleave', function () {
         card.classList.add('tilt-reset');
@@ -4021,8 +4021,23 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       pdfButton.title = pdfButton.disabled
         ? 'PDF export libraries are still loading'
         : 'Download one PDF per chapter';
-      return h('div', { class: 'welcome-domain', data: { domain: d.prefix }, on: { click: function () { onDomainClick(d.prefix); } } }, [
-        h('div', { class: 'welcome-domain-icon', text: d.icon }),
+      return h('div', {
+        class: 'welcome-domain',
+        role: 'button',
+        tabindex: '0',
+        'aria-label': 'Open ' + d.label,
+        data: { domain: d.prefix },
+        on: {
+          click: function () { onDomainClick(d.prefix); },
+          keydown: function (event) {
+            if (event.target !== event.currentTarget) return;
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            onDomainClick(d.prefix);
+          }
+        }
+      }, [
+        h('div', { class: 'welcome-domain-icon', 'aria-hidden': 'true', text: d.mark || d.label }),
         h('h3', { text: d.label }),
         h('p', { text: d.desc }),
         h('div', { class: 'welcome-domain-meta' }, [
@@ -4077,12 +4092,15 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     /* Stage element for the 3D welcome scene — mounted into below. The class
      * `welcome-3d-active` is added by AetherWelcome.mount() on success, which
      * hides the legacy emoji icon via CSS. */
-    var welcome3dStage = h('div', { class: 'welcome-3d-stage' });
+    var welcome3dStage = h('div', { class: 'welcome-3d-stage', 'aria-hidden': 'true' });
 
     var welcome = h('div', { class: 'welcome' }, [
       welcome3dStage,
       h('div', { class: 'welcome-icon', text: GUIDE_ICON }),
-      h('h1', { text: GUIDE_TITLE }),
+      h('h1', null, [
+        'Tech ',
+        h('span', { class: 'welcome-title-accent', text: 'Primer' })
+      ]),
       h('p', { html: 'Your complete reference across <strong>' + DOMAINS.length + ' domains</strong> and <strong>' + totalChapters + ' chapters</strong> of software engineering knowledge.' }),
       h('div', { class: 'welcome-stats' }, [
         stat(DOMAINS.length, 'Domains'),
@@ -4118,8 +4136,19 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       var lrChapter = lrSection && lrSection.chapters.find(function (c) { return c.id === lastRead.c; });
       if (lrChapter) {
         var resumeBanner = h('div', {
-          class: 'resume-banner', on: {
+          class: 'resume-banner',
+          role: 'button',
+          tabindex: '0',
+          'aria-label': 'Continue reading ' + lrChapter.title,
+          on: {
             click: function () {
+              var d = getDomain(lastRead.s);
+              if (d) { state.activeDomainFilter = d.prefix; updateSearchPlaceholder(); buildNavigation(); }
+              loadChapter(lastRead.s, lastRead.c);
+            },
+            keydown: function (event) {
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
               var d = getDomain(lastRead.s);
               if (d) { state.activeDomainFilter = d.prefix; updateSearchPlaceholder(); buildNavigation(); }
               loadChapter(lastRead.s, lastRead.c);
