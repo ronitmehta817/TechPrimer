@@ -891,7 +891,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       moon.style.display = theme === 'dark' ? 'block' : 'none';
     }
     if (state.mermaidReady) {
-      try { mermaid.initialize({ theme: theme === 'dark' ? 'dark' : 'default', startOnLoad: false }); } catch (e) { }
+      try { mermaid.initialize(mermaidConfig()); } catch (e) { }
     }
     if (window.AetherBg && window.AetherBg.setTheme) window.AetherBg.setTheme(theme);
     if (window.AetherWelcome && window.AetherWelcome.setTheme) window.AetherWelcome.setTheme(theme);
@@ -1464,10 +1464,93 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   }
 
   // ===================== MERMAID DIAGRAMS =====================
+  var MERMAID_DARK_THEME = {
+    darkMode: true,
+    background: '#07090b',
+    primaryColor: '#0e1415',
+    primaryTextColor: '#f5f6f6',
+    primaryBorderColor: '#2a8f84',
+    secondaryColor: '#152224',
+    tertiaryColor: '#0b0d10',
+    lineColor: '#8b939b',
+    textColor: '#e3e6e8',
+    clusterBorder: '#2e3439',
+    titleColor: '#00ffe0',
+    edgeLabelBackground: '#0b0d10',
+    actorLineColor: '#3a4148',
+    signalColor: '#8b939b',
+    labelTextColor: '#ffa800',
+    activationBorderColor: '#2a8f84',
+    noteBkgColor: '#2a1e06',
+    noteBorderColor: '#ffa800',
+    noteTextColor: '#f5f6f6',
+    rowOdd: '#111417',
+    rowEven: '#0d1013',
+    scaleLabelColor: '#f5f6f6',
+    git0: '#005248'
+  };
+  // Mindmap branches and timeline sections; Mermaid's derived scale is near-black here.
+  var MERMAID_DARK_SCALE = ['#005248', '#614000', '#2a4061', '#463e61', '#364f28', '#611e35'];
+  for (var scaleIndex = 0; scaleIndex < 12; scaleIndex++) {
+    MERMAID_DARK_THEME['cScale' + scaleIndex] = MERMAID_DARK_SCALE[scaleIndex % MERMAID_DARK_SCALE.length];
+  }
+
+  // Diagram sources hard-code pastel fills (`style A fill:#c8e6c9`) that dark-mode
+  // text can't be read on, so in dark mode each fill becomes a dark tint of the
+  // nearest site accent, bordered in that accent.
+  var MERMAID_DARK_TINTS = [
+    // [hue upper bound, fill, stroke]
+    [15, '#2c1516', '#ff6b6b'],
+    [45, '#2c1f05', '#ffa800'],
+    [70, '#2c2711', '#ffd84d'],
+    [165, '#1a2616', '#8fd16a'],
+    [190, '#032d29', '#00ffe0'],
+    [255, '#151f2e', '#6ea8ff'],
+    [330, '#211e2e', '#b9a4ff'],
+    [360, '#2c1516', '#ff6b6b']
+  ];
+
+  function mermaidConfig() {
+    var config = { startOnLoad: false, theme: 'default', securityLevel: 'loose', flowchart: { curve: 'basis' } };
+    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+      config.theme = 'base';
+      config.themeVariables = MERMAID_DARK_THEME;
+    }
+    return config;
+  }
+
+  function darkMermaidTint(hex) {
+    var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex);
+    if (!m) return null;
+    var v = m[1].length === 3 ? m[1].replace(/./g, '$&$&') : m[1];
+    var r = parseInt(v.slice(0, 2), 16) / 255;
+    var g = parseInt(v.slice(2, 4), 16) / 255;
+    var b = parseInt(v.slice(4, 6), 16) / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    var saturation = d === 0 ? 0 : d / (1 - Math.abs(max + min - 1));
+    if (saturation < 0.1) return ['#1c1e20', '#9aa1a8'];
+    var hue = 60 * (max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4);
+    for (var i = 0; i < MERMAID_DARK_TINTS.length; i++) {
+      if (hue < MERMAID_DARK_TINTS[i][0]) return MERMAID_DARK_TINTS[i].slice(1);
+    }
+    return null;
+  }
+
+  function darkenMermaidStyles(code) {
+    return code.replace(/^(\s*style\s+\S+\s+)(.+)$/gm, function (line, head, decls) {
+      var fill = /(?:^|,)\s*fill\s*:\s*(#[0-9a-f]+)/i.exec(decls);
+      var tint = fill && darkMermaidTint(fill[1]);
+      if (!tint) return line;
+      var rest = decls.split(',').filter(function (decl) {
+        return decl.trim() && !/^\s*(fill|stroke|color)\s*:/i.test(decl);
+      });
+      return head + ['fill:' + tint[0], 'stroke:' + tint[1], 'color:#f5f6f6'].concat(rest).join(',');
+    });
+  }
+
   function initMermaid() {
     if (typeof mermaid === 'undefined') return;
-    var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-    mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose', flowchart: { curve: 'basis' } });
+    mermaid.initialize(mermaidConfig());
     state.mermaidReady = true;
   }
 
@@ -1686,6 +1769,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function renderMermaidInto(container, code, originalSrc) {
     var uid = 'mmd-' + (++mermaidIdCounter);
     var cleanCode = sanitizeMermaidSource(code);
+    if (document.documentElement.getAttribute('data-theme') === 'dark') cleanCode = darkenMermaidStyles(cleanCode);
     function handleFailure(reason) {
       try { console.warn('[MQ-ERR] ' + uid + ': ' + reason + '\n--- code ---\n' + cleanCode); } catch (e) { }
       if (originalSrc && renderMermaidInkFallback(container, originalSrc)) return;
@@ -1739,8 +1823,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     if (!pending.length) return;
 
-    var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-    try { mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose', flowchart: { curve: 'basis' } }); } catch (e) { }
+    try { mermaid.initialize(mermaidConfig()); } catch (e) { }
 
     pending.forEach(function (item) {
       var wrapper = h('div', { class: 'mermaid-wrapper' });
@@ -1764,8 +1847,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function reRenderMermaid() {
     var wrappers = dom.contentArea.querySelectorAll('.mermaid-wrapper');
     if (!wrappers.length) return;
-    var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-    try { mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose', flowchart: { curve: 'basis' } }); } catch (e) { }
+    try { mermaid.initialize(mermaidConfig()); } catch (e) { }
 
     setTimeout(function () {
       wrappers.forEach(function (wrapper) {
