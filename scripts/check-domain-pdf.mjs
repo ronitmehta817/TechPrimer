@@ -171,7 +171,7 @@ assert(
   "vendor.js?v=20260825-mermaid-full",
   "styles.css?v=20260825-mermaid-full",
   "mermaid-detect.js?v=20260825-mermaid-full",
-  "app.js?v=20260825-mermaid-full"
+  "app.js?v=20261102-dark-diagrams"
 ].forEach(asset => {
   assert(index.includes(asset), `Missing PDF export cache version: ${asset}`);
 });
