@@ -293,6 +293,7 @@ html[data-theme="dark"] {
 
 body {
     font-family: var(--font-sans);
+    font-weight: 500;
     background: var(--bg-body);
     color: var(--text-primary);
     line-height: 1.47;
@@ -1193,7 +1194,7 @@ body::after {
 .nav-item.active {
     color: var(--nav-active-text);
     background: var(--liquid-shell-strong);
-    font-weight: 500;
+    font-weight: 600;
     box-shadow: var(--liquid-shadow), inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent 65%);
 }
 
@@ -1314,7 +1315,7 @@ body::after {
 }
 
 .guide-main.search-blur {
-    filter: blur(5px) url(#water-droplets);
+    filter: blur(3px) url(#water-droplets);
 }
 
 .guide-main.full-width {
@@ -4124,7 +4125,7 @@ body::after {
 .toc-link.active {
     color: var(--accent);
     border-left-color: var(--accent);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .toc-link[data-level="3"] {

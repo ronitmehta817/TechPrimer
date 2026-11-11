@@ -30,8 +30,8 @@
  *   'leaf'   — list-item key term; inherits its branch's colour.
  */
 window.AllWebMindMapData = {
-  checksum: "1e7fb28a",
-  generatedAt: "2026-08-25T17:43:22.609Z",
+  checksum: "c9bbcd2f",
+  generatedAt: "2026-11-10T13:33:46.766Z",
   chapters: {
   "sd-foundations/01-what-is-system-design": {
     "title": "What Is System Design?",
@@ -91988,6 +91988,12 @@ window.AllWebMindMapData = {
               "title": "The steps form a loop.",
               "hLevel": 5,
               "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Many interview guides compress the same loop into five visible milestones: clarify requirements, identify entities, design classes, implement, and handle exceptions.",
+              "hLevel": 5,
+              "children": []
             }
           ]
         },
@@ -92386,6 +92392,448 @@ window.AllWebMindMapData = {
         },
         {
           "kind": "branch",
+          "title": "The Five-Step Answer Template",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "AlgoMaster's How to Answer a LLD Interview Problem, by Ashish Pratap Singh, describes a popular checklist that compresses the loop into five",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Table summarizing Milestone, Steps in this chapter's loop, Visible output for 1. Clarify requirements, 2. Identify entities, 3. Class design, 4. Implementation",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "The template reinforces two habits.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Treat \"entities are the nouns in the problem statement\" as a way to generate candidates, not as the model.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Worked Example: Designing Stack Overflow",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "This walkthrough applies the five milestones to a common prompt: \"Design Stack Overflow.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "sub",
+              "title": "Clarify the Requirements",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Start with questions that can change the model",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Which core features must the first version support, and which come first?",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Who are the users, and what actions can each of them take?",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Are there constraints such as content limits or moderation rules?",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Must the design handle concurrent requests?",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "How should errors, edge cases, and invalid input behave?",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Then ask questions specific to the product",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Assume the interviewer agrees on this scope",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Identify the Entities",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "List candidates with a one-line purpose",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "User",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Question",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Answer",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Comment",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Tag",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Check each candidate against behavior.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Design Classes and Relationships",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Translate the entities into classes with attributes, then relate them",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "A User asks many questions, writes many answers and comments, and casts many votes.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "A Question has many answers, comments, tags, and votes.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "An Answer has many comments and votes.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "A Comment belongs to exactly one question or one answer.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "A Tag is shared. One tag labels many questions, and deleting a question does not delete the tag, so the link is an association rather than composition.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "A UML class diagram is optional in most interviews, so ask before drawing one.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Define Interfaces and Core Methods",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Methods are the verbs of the design.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Commentable",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Votable",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Core methods for each class, leaving out getters and setters",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "User",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Question",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Answer",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Give each operation one owner.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Add a Central Coordinating Class",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Callers should not wire entities together by hand.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "user management;",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "question and answer management;",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "voting and commenting;",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "search and retrieval;",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "keeping data consistent across those operations.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Its public operations map directly to the agreed scope",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "acceptAnswer takes the acting user so the class can check that only the question's author accepts an answer.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Keep business rules inside the objects that own the data.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Implement the Core",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Confirm which methods the interviewer wants to see, then write them with ordinary good practice",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Use meaningful names for classes, methods, and variables.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Prefer simple, readable code over clever code.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Favor composition over inheritance to avoid tight coupling.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Avoid duplicating logic.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Use interfaces to define contracts between components.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "If the interviewer wants to see the code run, a short demo method that exercises the main flows is enough.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Running main prints 1, 6, and 1: the repeated vote changes nothing, the author's reputation rises from 1 to 6, and the",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Address Concurrency",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Ask whether concurrent requests are in scope.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Synchronization or locks",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Atomic operations",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Immutable objects",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Thread-safe collections",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Votes",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "These mechanisms protect one process.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Handle Exceptions and Edge Cases",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Name the edge cases and decide the behavior for each before the interviewer asks",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Table summarizing Scenario, Decision for A user votes on their own question or answer, A user votes twice on the same post, A question",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Expected business rejections and programming errors deserve different treatment.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "branch",
           "title": "Managing Time and Communication",
           "hLevel": 1,
           "children": [
@@ -92434,6 +92882,12 @@ window.AllWebMindMapData = {
             {
               "kind": "summary",
               "title": "One complete scenario with explicit failure behavior demonstrates more design skill than twenty disconnected classes.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Ask whether the interviewer wants a UML diagram or code first, which methods matter most, and whether a runnable demo is expected.",
               "hLevel": 5,
               "children": []
             }
@@ -92669,6 +93123,81 @@ window.AllWebMindMapData = {
                 {
                   "kind": "summary",
                   "title": "Explain why the previous design was reasonable under the earlier scope and what new design pressure now justifies a different boundary or",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "7. Why model Commentable and Votable as interfaces instead of a shared base class?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Question and Answer share capabilities, not an identity.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Shared implementation can still be reused through composition.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "8. How do you stop duplicate votes and self-votes, and keep scores correct under concurrency?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Record votes by voter instead of keeping a counter.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "put swaps one voter's entry atomically and returns the previous value, so racing requests from the same user still produce an exact",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "9. When does a central coordinating class help, and when does it hurt?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "It helps when callers need one simple entry point and when an operation spans several objects, such as a vote that changes",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "It hurts when it starts making decisions that belong to entities, or when every new feature lands in it.",
                   "hLevel": 5,
                   "children": []
                 }
@@ -94907,6 +95436,12 @@ window.AllWebMindMapData = {
               "title": "Do not write class names or database calls prematurely.",
               "hLevel": 5,
               "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "To show every actor and goal on one page, including shared and optional behavior, draw a UML use case diagram.",
+              "hLevel": 5,
+              "children": []
             }
           ]
         },
@@ -95420,6 +95955,758 @@ window.AllWebMindMapData = {
       ]
     }
   },
+  "design-lld-foundations-modeling/uml-use-case-diagrams": {
+    "title": "UML Use Case Diagrams",
+    "root": {
+      "kind": "root",
+      "title": "UML Use Case Diagrams",
+      "hLevel": 0,
+      "children": [
+        {
+          "kind": "branch",
+          "title": "In Plain English",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "A use case diagram is a UML behavioral diagram that shows who interacts with a system and which goals the system helps",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "It is built from four elements",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Actors",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Use cases",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "The system boundary",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Relationships",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "The diagram deliberately leaves out how anything works.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "A use case diagram is the visual index of the written use cases described in Requirements and Use Cases.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Why It Matters",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "Many design mistakes begin as scope mistakes.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "It also makes boundaries explicit.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "In an LLD interview, you rarely need a formal diagram.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Building Blocks",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "sub",
+              "title": "Actors",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "An actor is a role played by someone or something outside the system.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Actors come in two kinds",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Primary actors",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Secondary actors",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Actors are drawn as stick figures with a label.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Internal components are not actors.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Use Cases",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "A use case is a goal the system fulfills for an actor: something that starts, does meaningful work, and ends with a",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Good use case names follow three rules",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Start with a verb",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Represent a complete goal",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "End with a meaningful result",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "A useful test: would the actor be satisfied if this were the only thing they did in a session?",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "System Boundary",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "The system boundary is a rectangle around all use cases, labeled with the system's name.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Everything inside the box is your responsibility to build.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Relationships",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Four kinds of relationship appear on use case diagrams",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Association",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Include",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Extend",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Generalization",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "UML writes stereotypes such as «include» with guillemets.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Include versus Extend",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "Include and extend are the most commonly confused parts of the notation.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Table comparing «include», «extend» by Meaning, Optional, Arrow direction, Who knows whom",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Use «include» to factor out behavior shared by several use cases, such as \"Authenticate\" or \"Make Payment.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Drawing One Step by Step",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "Build the diagram in five passes",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Identify actors",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "List use cases for each actor",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Draw the system boundary",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Connect actors to use cases",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Add include, extend, and generalization",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Every use case should have at least one actor, every actor at least one use case, and every name should still pass",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "The building blocks and the step-by-step method follow AlgoMaster's Use Case Diagram lesson.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Worked Example: Movie Ticket Booking",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "Agree on the scope first",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Guest",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Customer",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Admin",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Payment Gateway",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Seat maps, refunds after a show, loyalty points, and notifications are out of scope.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Mermaid has no native use case diagram, so the diagram below approximates UML notation with a flowchart.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Read the diagram as a set of claims that the interviewer can confirm or challenge",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Every booking takes payment, and payment involves the external gateway.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "From Diagram to Code",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "A use case diagram does not dictate classes, but each element leaves a clear trace in the design",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Each use case",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Primary actors",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Secondary actors",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "«include»",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "«extend»",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Trace each diagram element in the code",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "\"Add Movie\" and \"Cancel Ticket\" follow the same pattern.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Notice what the code does not contain: no class per use case and no class per actor.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Use Case Diagrams in an LLD Interview",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "leaf",
+              "title": "Keep it to two or three minutes. A bulleted list of actors and their use cases carries the same information when drawing is slow.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Read the list back to the interviewer and ask what is missing or out of scope. The answer often reveals a hidden actor, such as an admin or an external system.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Mark exclusions explicitly. \"Refunds are out of scope\" is a design decision, not an omission.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Use the use cases as a checklist later. Each one should map to a public operation, and the important ones deserve a walkthrough.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Stop when the next decision is about structure rather than scope, and move on to entities and classes.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Trade-offs and Failure Modes",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "leaf",
+              "title": "Diagram versus list",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Coarse versus fine use cases",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Include for reuse versus decomposition",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Static picture versus behavior",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Tight boundary versus hidden dependencies",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Common Mistakes",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "leaf",
+              "title": "Naming use cases as nouns or interface actions, such as \"Ticket Management\" or \"Click Pay.\"",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Drawing the steps of one goal as separate use cases.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Placing actors inside the system boundary, or drawing internal components such as the database as actors.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Reversing the «extend» arrow, which points from the optional use case to the base.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Using «include» for optional behavior, or «extend» for mandatory behavior.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Interview Questions",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "sub",
+              "title": "1. What does a use case diagram show, and what does it deliberately leave out?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "It shows the actors outside the system, the goals the system provides to them, the boundary between the two, and how actors",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "It leaves out implementation: classes, method calls, screens, data, ordering, and timing.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "2. What is the difference between «include» and «extend», and which way do the arrows point?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "«include» means the base use case always runs the included one, and the base cannot complete without it.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "«extend» means an optional use case adds behavior to a base under a condition.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "3. What is the difference between primary and secondary actors, and can an external system be an actor?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "A primary actor starts a use case to achieve a goal, such as a customer booking a ticket.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "External systems are actors when they sit outside the boundary, whether they start an interaction or are called by it.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "4. How granular should a use case be?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "A use case should be a complete goal that produces a result the actor values: \"Book Ticket,\" not \"Enter Card Number.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Too coarse, such as \"Manage Bookings,\" hides different rules and actors.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "5. How does a use case diagram influence the low-level design?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Use cases become the public operations of application services, which keeps the API aligned with user goals.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "It does not produce the class model by itself.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "6. When would you skip drawing a use case diagram in an interview?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Skip the formal drawing when the problem has one actor and a handful of goals, when time is short, or when the",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Draw it when several actors interact, when external systems matter, or when optional and shared behavior is easy to confuse.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Recap",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "leaf",
+              "title": "A use case diagram shows who can do what with a system: actors, use cases, the system boundary, and relationships.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Primary actors start use cases; secondary actors are called by the system. Internal components are never actors.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Name use cases as verb-first, complete goals with a meaningful result.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "«include» is mandatory and points from the base; «extend» is optional and points to the base.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Mermaid has no native use case diagram; a flowchart with a subgraph boundary is a readable approximation.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
   "design-lld-foundations-modeling/uml-class-diagrams": {
     "title": "UML Class Diagrams",
     "root": {
@@ -95559,6 +96846,24 @@ window.AllWebMindMapData = {
               "title": "Interfaces and abstract classes can use stereotypes such as > or >.",
               "hLevel": 5,
               "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "The full member syntax adds detail when it carries a decision",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Mermaid class diagrams usually write the type before the name (-String color), mark an abstract operation with a trailing *, and mark",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Pick the stereotype that matches the intent.",
+              "hLevel": 5,
+              "children": []
             }
           ]
         },
@@ -95612,6 +96917,43 @@ window.AllWebMindMapData = {
             {
               "kind": "summary",
               "title": "Do not infer more than the diagram states.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "Relationship Strength and When to Use Each",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "Each relationship makes a different promise about how two classes are bound.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Table summarizing Relationship, Code signal, Lifecycle, Use it when for Dependency, Association, Aggregation, Composition",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "For the first four, coupling rises with ownership: dependency, then association, then aggregation, then composition.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Some rankings, including the one in AlgoMaster's Class Diagram lesson, place it above inheritance.",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "The design rule holds either way: prefer the weakest relationship that meets the requirement.",
               "hLevel": 5,
               "children": []
             }
@@ -95698,6 +97040,55 @@ window.AllWebMindMapData = {
             {
               "kind": "summary",
               "title": "Diagram interfaces at architectural seams and meaningful variation points.",
+              "hLevel": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "branch",
+          "title": "All Six Relationships in One Diagram: Online Bookstore",
+          "hLevel": 1,
+          "children": [
+            {
+              "kind": "summary",
+              "title": "This model builds on the online bookstore example from the same AlgoMaster lesson, with a wishlist and two kinds of book added",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Composition",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Association",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Aggregation",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Generalization",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "leaf",
+              "title": "Dependency",
+              "hLevel": 5,
+              "children": []
+            },
+            {
+              "kind": "summary",
+              "title": "Expect a follow-up: should OrderItem read the price from Book or keep its own copy?",
               "hLevel": 5,
               "children": []
             }
@@ -96103,6 +97494,56 @@ window.AllWebMindMapData = {
                   "children": []
                 }
               ]
+            },
+            {
+              "kind": "sub",
+              "title": "7. Rank the class relationships from weakest to strongest coupling, and justify the order.",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "State the criterion first: how much one class must change, or be kept alive, when the other changes.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Generalization is usually the tightest, because a subclass inherits its parent's state and implementation.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "8. How do you show abstract operations, static members, multiplicity, and default values on a class diagram?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "In UML, abstract operations are italic and static members are underlined.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "In Mermaid, a trailing * marks an abstract operation, a trailing $ marks a static member, and types are usually written before",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
             }
           ]
         },
@@ -96273,6 +97714,50 @@ window.AllWebMindMapData = {
               "title": "Name messages as operations with business meaning.",
               "hLevel": 5,
               "children": []
+            },
+            {
+              "kind": "sub",
+              "title": "Actors, Participants, and Lifelines",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "An actor starts the interaction from outside the system, such as a user or an external service.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "Message Types",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "AlgoMaster's Sequence Diagram lesson distinguishes six message types.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Table summarizing Message, UML notation, Meaning, Mermaid syntax for Synchronous, Asynchronous, Return, Self",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Return arrows are optional in UML, but they make the data flowing back explicit; include them when the returned value matters.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "This login and logout flow uses every message type",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
             }
           ]
         },
@@ -96322,6 +97807,73 @@ window.AllWebMindMapData = {
               "title": "Do not confuse a workflow step with a durable domain state.",
               "hLevel": 5,
               "children": []
+            },
+            {
+              "kind": "sub",
+              "title": "State Machine Notation",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "A state machine diagram describes how one object responds to events across its lifetime.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Initial pseudo-state",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Final state",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Transition label",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Event types",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Entry, exit, and do behavior",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "This lifecycle of a library BookCopy uses guards, a composite state, a time event, and behavior written inside the states: entry and",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "renew is an internal transition: it extends the due date without leaving Borrowed, so the entry action does not run again.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "A state machine covers every event for one object, while a sequence diagram covers one interaction across several objects.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "State machines also produce test cases directly.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
             }
           ]
         },
@@ -96377,6 +97929,61 @@ window.AllWebMindMapData = {
               "title": "Mermaid flowcharts are a practical way to express activities.",
               "hLevel": 5,
               "children": []
+            },
+            {
+              "kind": "sub",
+              "title": "Activity Diagram Notation",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "An activity diagram is a flowchart with precise meanings for parallel work and responsibility.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Initial node",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Action",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Control flow",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Object flow and object node",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "leaf",
+                  "title": "Decision and merge",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "The classic order-processing workflow combines forks, joins, a decision, and swimlanes.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "The merge before the join is essential.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
             }
           ]
         },
@@ -96819,6 +98426,81 @@ window.AllWebMindMapData = {
                 {
                   "kind": "summary",
                   "title": "Mark local transaction boundaries and asynchronous handoffs.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "7. What are the six sequence-diagram message types, and why does the synchronous versus asynchronous distinction matter?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Synchronous messages block the caller until a result returns.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "The synchronous and asynchronous distinction changes latency and failure behavior.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "8. What is the difference between entry, exit, and do behavior in a state, and how does it map to code?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "An entry action runs every time the object enters the state, whichever transition brought it there.",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "In code, route every state change through one method so entry and exit actions cannot be skipped.",
+                  "hLevel": 5,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "kind": "sub",
+              "title": "9. When does an activity diagram need swimlanes, and how do you tell a merge from a join?",
+              "hLevel": 2,
+              "children": [
+                {
+                  "kind": "summary",
+                  "title": "Show answer and reasoning",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "Add swimlanes when responsibility is part of the question: which role, team, or system performs each step, and where work is handed",
+                  "hLevel": 5,
+                  "children": []
+                },
+                {
+                  "kind": "summary",
+                  "title": "A merge recombines alternative paths after a decision and continues as soon as any one path arrives.",
                   "hLevel": 5,
                   "children": []
                 }
