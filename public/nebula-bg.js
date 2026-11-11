@@ -13,34 +13,13 @@
  *            play (mirrored) → contact; text stays on its glass panel.
  *
  * Like the portfolio, the canvas renders at reduced resolution and is
- * stretched to the viewport, and a film-grain tile sits over it.
+ * stretched to the viewport.
  * =========================================================================== */
 (() => {
   'use strict';
 
   const root = document.documentElement;
   const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-
-  /* Film grain: the portfolio's 180px random-noise tile. */
-  {
-    const tile = document.createElement('canvas');
-    tile.width = tile.height = 180;
-    const ctx = tile.getContext('2d');
-    if (ctx) {
-      const img = ctx.createImageData(180, 180);
-      for (let i = 0; i < img.data.length; i += 4) {
-        const v = (Math.random() * 255) | 0;
-        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-        img.data[i + 3] = 255;
-      }
-      ctx.putImageData(img, 0, 0);
-      const grain = document.createElement('div');
-      grain.className = 'tp-grain';
-      grain.setAttribute('aria-hidden', 'true');
-      grain.style.backgroundImage = `url(${tile.toDataURL()})`;
-      document.body.appendChild(grain);
-    }
-  }
 
   const canvas = document.createElement('canvas');
   canvas.id = 'tp-nebula';

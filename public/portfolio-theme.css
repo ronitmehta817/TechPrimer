@@ -5,8 +5,8 @@
  * identical to the original app.
  *
  * Gradients follow the designer portfolio: the colour lives in the animated
- * background (nebula-bg.js, a port of the portfolio's shader, plus its film
- * grain); surfaces are black glass with white hairlines; accents are flat
+ * background (nebula-bg.js, a port of the portfolio's shader); surfaces are
+ * glossy black glass with white hairlines; accents are flat
  * orange and aqua; tinted cards use the portfolio's "accent fading into black"
  * recipe with a glow of the same colour underneath.
  */
@@ -62,8 +62,8 @@
     --liquid-shell-strong: rgba(0, 0, 0, .42);
     --liquid-border: rgba(255, 255, 255, .13);
     --liquid-border-strong: rgba(255, 255, 255, .22);
-    --liquid-specular: rgba(255, 255, 255, .06);
-    --liquid-specular-soft: rgba(255, 255, 255, .015);
+    --liquid-specular: rgba(255, 255, 255, .12);
+    --liquid-specular-soft: rgba(255, 255, 255, .035);
     --liquid-shadow: 0 12px 30px rgba(0, 0, 0, .35);
     --liquid-shadow-hover: 0 20px 48px rgba(0, 0, 0, .45);
     --glass-edge: rgba(255, 255, 255, .08);
@@ -275,21 +275,6 @@ body::before {
     opacity: 1;
 }
 
-.tp-grain {
-    position: fixed;
-    inset: -10%;
-    z-index: -1;
-    pointer-events: none;
-    opacity: .2;
-    mix-blend-mode: overlay;
-    background-size: 180px;
-    animation: tpGrain .9s steps(6) infinite;
-}
-
-[data-theme="light"] .tp-grain {
-    opacity: .12;
-}
-
 #bg-3d-canvas {
     background: transparent;
     opacity: .55;
@@ -311,11 +296,9 @@ body::before {
 /* ===== Header ===== */
 .header,
 [data-theme] .header.scrolled {
-    background: var(--tp-glass);
+    background: linear-gradient(180deg, var(--liquid-specular), var(--liquid-specular-soft) 52%, transparent), var(--tp-glass);
     border-color: var(--tp-line);
-    box-shadow: var(--tp-shadow);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: inset 0 1px 0 var(--tp-sheen), var(--tp-shadow);
 }
 
 .header::after {
@@ -401,11 +384,9 @@ body::before {
 .prefs-dropdown,
 .slide-panel,
 .modal-box {
-    background: var(--tp-pop);
+    background: linear-gradient(180deg, var(--liquid-specular), transparent) top / 100% 140px no-repeat, var(--tp-pop);
     border-color: var(--tp-line);
-    box-shadow: var(--tp-shadow);
-    backdrop-filter: blur(22px) saturate(150%);
-    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    box-shadow: inset 0 1px 0 var(--tp-sheen), var(--tp-shadow);
 }
 
 .search-result-item:hover,
@@ -432,11 +413,9 @@ body::before {
 
 /* ===== Sidebar ===== */
 .sidebar {
-    background: var(--tp-glass-side);
+    background: linear-gradient(180deg, var(--liquid-specular), transparent) top / 100% 180px no-repeat, var(--tp-glass-side);
     border-color: var(--tp-line);
-    box-shadow: var(--tp-shadow);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: inset 0 1px 0 var(--tp-sheen), var(--tp-shadow);
 }
 
 .sidebar-section-header {
@@ -446,10 +425,6 @@ body::before {
     color: var(--text-secondary);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-}
-
-.sidebar-section-header::before {
-    display: none;
 }
 
 .sidebar-section-header:hover {
@@ -529,8 +504,6 @@ body::before {
         var(--tp-panel);
     border-color: var(--liquid-border-strong);
     box-shadow: inset 0 1px 0 var(--tp-sheen), inset 0 -1px 0 var(--liquid-specular-soft), var(--tp-shadow);
-    backdrop-filter: blur(28px) saturate(170%);
-    -webkit-backdrop-filter: blur(28px) saturate(170%);
 }
 
 /* Pale paper has little to refract, so light glass gets its depth from a lit
@@ -546,8 +519,6 @@ body::before {
         0 0 0 1px rgba(20, 30, 50, .07),
         0 2px 6px rgba(20, 30, 50, .06),
         0 28px 70px -16px rgba(20, 30, 50, .22);
-    backdrop-filter: blur(20px) saturate(200%);
-    -webkit-backdrop-filter: blur(20px) saturate(200%);
 }
 
 .reading-time,
@@ -557,11 +528,6 @@ body::before {
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-}
-
-.reading-time::before,
-.reading-time-badge::before {
-    display: none;
 }
 
 .chapter-section-label {
@@ -629,10 +595,6 @@ body::before {
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-}
-
-.md-content h4::before {
-    display: none;
 }
 
 .md-content h4::after {
@@ -810,20 +772,14 @@ body::before {
     box-shadow: none;
 }
 
-.chapter-mindmap-open::before {
-    display: none;
-}
-
 .chapter-nav {
     border-top-color: var(--liquid-border);
 }
 
 .chapter-toc {
-    background: var(--tp-glass-side);
+    background: linear-gradient(180deg, var(--liquid-specular), transparent) top / 100% 180px no-repeat, var(--tp-glass-side);
     border-color: var(--tp-line);
-    box-shadow: var(--liquid-shadow);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    box-shadow: inset 0 1px 0 var(--tp-sheen), var(--liquid-shadow);
 }
 
 .toc-link:hover {
@@ -928,9 +884,7 @@ body::before {
     --tile-to: #ff9900;
     background: linear-gradient(150deg, rgba(var(--a), var(--tp-tint)), var(--tp-card-mid) 58%), var(--tp-card-base);
     border-color: rgba(var(--a), .42);
-    box-shadow: 0 26px 56px -28px rgba(var(--a), .65);
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: inset 0 1px 0 var(--tp-sheen), 0 26px 56px -28px rgba(var(--a), .65);
 }
 
 .welcome-domain[data-domain="design-hld-"] { --a: 255, 168, 0; --tile-from: #c8511b; --tile-to: #ff9900; }
@@ -942,7 +896,7 @@ body::before {
 
 .welcome-domain:hover {
     border-color: rgba(var(--a), .75);
-    box-shadow: 0 26px 56px -22px rgba(var(--a), .85);
+    box-shadow: inset 0 1px 0 var(--tp-sheen), 0 26px 56px -22px rgba(var(--a), .85);
 }
 
 .welcome-domain::before,
@@ -1028,18 +982,7 @@ body::before {
     }
 }
 
-@keyframes tpGrain {
-    0% { transform: translate3d(0, 0, 0); }
-    17% { transform: translate3d(-4%, 3%, 0); }
-    33% { transform: translate3d(3%, -5%, 0); }
-    50% { transform: translate3d(-6%, -2%, 0); }
-    67% { transform: translate3d(5%, 4%, 0); }
-    83% { transform: translate3d(-2%, 6%, 0); }
-    100% { transform: translate3d(0, 0, 0); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .tp-grain,
     .welcome-domain::before,
     #progress-bar {
         animation: none !important;
@@ -1056,8 +999,7 @@ body::before {
 }
 
 @media print {
-    #tp-nebula,
-    .tp-grain {
+    #tp-nebula {
         display: none;
     }
 }
