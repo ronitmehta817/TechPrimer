@@ -1,5 +1,5 @@
 /* eslint-disable */
-/** Core TechPrimer domains. HLD & LLD loads from public/content/design.js. */
+/** Core ArchDock domains. HLD & LLD loads from public/content/design.js. */
 const CONTENT = [
   {
     "id": "sd-foundations",

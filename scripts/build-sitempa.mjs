@@ -9,7 +9,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTENT_FILE = join(ROOT, 'public', 'content.js');
 const DESIGN_MANIFEST_FILE = join(ROOT, 'public', 'content', 'design-manifest.js');
 const OUTPUT_FILE = join(ROOT, 'public', 'sitemap.xml');
-const ORIGIN = 'https://tech-primer.ronitmehta817.workers.dev/';
+const ORIGIN = 'https://archdock.ronitmehta817.workers.dev/';
 const LAST_MODIFIED = '2026-08-25';
 
 function loadSections() {

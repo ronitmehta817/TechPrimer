@@ -1,5 +1,5 @@
 /* ===========================================================================
- * Tech Primer · nebula background
+ * ArchDock · nebula background
  *
  * A port of the designer portfolio's WebGL gradient: soft colour blobs warped
  * by simplex noise, drifting slowly, dithered so the gradient never bands. The

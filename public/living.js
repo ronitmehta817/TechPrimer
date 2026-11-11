@@ -1,5 +1,5 @@
 /*
- * TechPrimer "living" diagrams.
+ * ArchDock "living" diagrams.
  *
  * Takes Mermaid diagram text, reads its structure with Mermaid's own parser, and draws it itself:
  * icon cards, violet/pink palette, packets that travel along connections, hover to trace,

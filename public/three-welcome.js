@@ -1,5 +1,5 @@
 /* ===========================================================================
- * Tech Primer · Welcome 3D Hero — Network Topology
+ * ArchDock · Welcome 3D Hero — Network Topology
  *
  * A scroll-reactive 3D system topology rendered in the welcome hero. A central
  * iridescent hub is connected by glowing edges to domain satellite nodes
