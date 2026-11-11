@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    rect { fill: #060a12; }
+    .a-char { fill: #f5f6f6; }
+    .d-char { fill: #ffa800; }
+    @media (prefers-color-scheme: light) {
+      rect { fill: #ffffff; stroke: rgba(10, 14, 20, 0.16); stroke-width: 1.5; }
+      .a-char { fill: #0b0d10; }
+      .d-char { fill: #c25e00; }
+    }
+  </style>
+  <rect width="64" height="64" rx="14"/>
+  <text x="21" y="44" class="a-char" font-family="Arial,sans-serif" font-weight="800" font-size="28" text-anchor="middle">A</text>
+  <text x="43" y="44" class="d-char" font-family="Arial,sans-serif" font-weight="800" font-size="28" text-anchor="middle">D</text>
+</svg>

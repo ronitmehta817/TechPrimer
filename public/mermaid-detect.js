@@ -41,8 +41,11 @@
     );
   }
 
-  global.TechPrimerMermaidDetector = Object.freeze({
+  var detector = Object.freeze({
     firstDirectiveLine: firstDirectiveLine,
     looksLikeMermaidSource: looksLikeMermaidSource
   });
+
+  global.ArchDockMermaidDetector = detector;
+  global.TechPrimerMermaidDetector = detector;
 })(window);

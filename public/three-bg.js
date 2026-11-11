@@ -1,5 +1,5 @@
 /* ===========================================================================
- * Tech Primer · Ambient 3D Background — Constellation + Data Globes
+ * ArchDock · Ambient 3D Background — Constellation + Data Globes
  *
  * The background is a wide constellation network of domain-tinted nodes
  * connected by proximity edges. Sprinkled through the constellation are a

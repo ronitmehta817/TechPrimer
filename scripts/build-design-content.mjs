@@ -144,7 +144,7 @@ function validateAndNormalize(sections, legacyRoutes) {
       for (const link of links) {
         if (/^(?:https?:|mailto:|#)/i.test(link)) continue;
         if (link.startsWith('/?')) {
-          const url = new URL(link, 'https://tech-primer.local');
+          const url = new URL(link, 'https://archdock.local');
           const target = `${url.searchParams.get('section')}/${url.searchParams.get('chapter')}`;
           if (!routeKeys.has(target)) fail(`${section.id}/${chapter.id} links to missing chapter ${target}`);
           continue;

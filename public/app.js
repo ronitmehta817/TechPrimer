@@ -7,12 +7,12 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   'use strict';
 
   // ===================== CONFIG =====================
-  var THEME_KEY = 'tech-primer-theme';
-  var STORAGE_PFX = 'tp-';
+  var THEME_KEY = 'archdock-theme';
+  var STORAGE_PFX = 'ad-';
   var DEFAULT_LANG = 'plaintext';
-  var GUIDE_TITLE = 'Tech Primer';
+  var GUIDE_TITLE = 'ArchDock';
   var GUIDE_ICON = '\uD83D\uDCDA';
-  var SITE_ORIGIN = 'https://tech-primer.ronitmehta817.workers.dev/';
+  var SITE_ORIGIN = 'https://archdock.ronitmehta817.workers.dev/';
   var SITE_DESCRIPTION = 'A complete software engineering learning guide for HLD, Java LLD, system design, microservices, message queues, and Spring Framework.';
 
 
@@ -160,7 +160,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       var domain = getDomain(section.id);
       var scope = domain ? domain.label : section.title;
       title = chapter.title + ' \u2014 ' + scope + ' | ' + GUIDE_TITLE;
-      description = 'Learn ' + chapter.title + ' in the ' + scope + ' section of Tech Primer.';
+      description = 'Learn ' + chapter.title + ' in the ' + scope + ' section of ' + GUIDE_TITLE + '.';
       canonical = getCanonicalUrl(section.id, chapter.id);
     }
     document.title = title;
@@ -383,7 +383,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   var Store = {
     pfx: STORAGE_PFX,
-    _legacyPfx: STORAGE_PFX,
+    _legacyPfx: 'tp-',
     _writeTimer: null,
     _writeInFlight: false,
     _writeQueued: false,
@@ -393,7 +393,11 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     _keyPrefix: function (k) { return k === 'prefs' ? this._legacyPfx : this.pfx; },
 
     _g: function (k, d) {
-      try { var v = localStorage.getItem(this._keyPrefix(k) + k); return v ? JSON.parse(v) : d; }
+      try {
+        var v = localStorage.getItem(this._keyPrefix(k) + k);
+        if (!v && this._legacyPfx) v = localStorage.getItem(this._legacyPfx + k);
+        return v ? JSON.parse(v) : d;
+      }
       catch (e) { return d; }
     },
     _s: function (k, v) {
@@ -875,7 +879,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
   // ===================== THEME =====================
   function initTheme() {
-    var saved = localStorage.getItem(THEME_KEY);
+    var saved = localStorage.getItem(THEME_KEY) || localStorage.getItem('tech-primer-theme');
     applyTheme(saved || 'dark');
   }
 
@@ -1056,9 +1060,10 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function configureMarked() { marked.setOptions({ gfm: true, breaks: false }); }
 
   function looksLikeMermaidSource(value) {
+    var detector = window.ArchDockMermaidDetector || window.TechPrimerMermaidDetector;
     return Boolean(
-      window.TechPrimerMermaidDetector &&
-      window.TechPrimerMermaidDetector.looksLikeMermaidSource(value)
+      detector &&
+      detector.looksLikeMermaidSource(value)
     );
   }
 
@@ -2339,7 +2344,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
     if (isFileProtocol()) {
       var fileErr = new Error('Fetch blocked on file:// protocol');
       fileErr.code = 'FILE_PROTOCOL';
-      try { console.warn('[Tech Primer] ' + fileErr.message + ' (open via a local HTTP server to load ' + url + ')'); } catch (e) { }
+      try { console.warn('[ArchDock] ' + fileErr.message + ' (open via a local HTTP server to load ' + url + ')'); } catch (e) { }
       cb(fileErr);
       return;
     }
@@ -4199,10 +4204,13 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
 
     var welcome = h('div', { class: 'welcome' }, [
       welcome3dStage,
-      h('div', { class: 'welcome-icon', text: GUIDE_ICON }),
+      h('div', { class: 'welcome-icon', 'aria-hidden': 'true' }, [
+        h('span', { class: 'logo-a', text: 'A' }),
+        h('span', { class: 'logo-d', text: 'D' })
+      ]),
       h('h1', null, [
-        'Tech ',
-        h('span', { class: 'welcome-title-accent', text: 'Primer' })
+        'Arch',
+        h('span', { class: 'welcome-title-accent', text: 'Dock' })
       ]),
       h('p', { html: 'Your complete reference across <strong>' + DOMAINS.length + ' domains</strong> and <strong>' + totalChapters + ' chapters</strong> of software engineering knowledge.' }),
       h('div', { class: 'welcome-stats' }, [
@@ -4646,7 +4654,8 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       if (content) {
         content.innerHTML =
           '<div class="chapter-error-card">' +
-          '<h2>TechPrimer could not load</h2>' +
+          '<div class="logo-icon" style="margin: 0 auto 16px auto;"><span class="logo-a">A</span><span class="logo-d">D</span></div>' +
+          '<h2>ArchDock could not load</h2>' +
           '<p>Reload the page after checking your network connection.</p>' +
           '</div>';
       }

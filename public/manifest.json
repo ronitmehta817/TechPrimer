@@ -1,20 +1,20 @@
 {
-  "name": "Tech Primer — Complete Guide",
-  "short_name": "Tech Primer",
+  "name": "ArchDock — Complete Guide",
+  "short_name": "ArchDock",
   "description": "Your complete reference across software engineering domains",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#faf7f2",
-  "theme_color": "#b09828",
+  "background_color": "#010204",
+  "theme_color": "#060a12",
   "orientation": "any",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23b09828'/><text x='96' y='120' font-size='96' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800'>TP</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='42' fill='%23060a12'/><text x='64' y='132' font-size='84' font-family='Arial,sans-serif' font-weight='800' text-anchor='middle' fill='%23f5f6f6'>A</text><text x='128' y='132' font-size='84' font-family='Arial,sans-serif' font-weight='800' text-anchor='middle' fill='%23ffa800'>D</text></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23b09828'/><text x='256' y='320' font-size='256' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800'>TP</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%23060a12'/><text x='170' y='352' font-size='224' font-family='Arial,sans-serif' font-weight='800' text-anchor='middle' fill='%23f5f6f6'>A</text><text x='342' y='352' font-size='224' font-family='Arial,sans-serif' font-weight='800' text-anchor='middle' fill='%23ffa800'>D</text></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml"
     }

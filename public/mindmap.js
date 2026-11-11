@@ -1,6 +1,6 @@
 /* eslint-disable */
 /**
- * Tech Primer — Chapter Mind Map (renderer)
+ * ArchDock — Chapter Mind Map (renderer)
  *
  * Render-only. The heading tree for every chapter is precomputed at build
  * time by scripts/build-mindmaps.mjs and shipped as mindmaps.js, which

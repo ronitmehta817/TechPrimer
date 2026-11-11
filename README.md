@@ -1,10 +1,10 @@
-# TechPrimer
+# ArchDock
 
 A Cloudflare Workers personal site project.
 
 ## Overview
 
-This project serves as a personal website / tech primer built with Cloudflare Workers. It features:
+This project serves as ArchDock, a personal website / software engineering learning guide built with Cloudflare Workers. It features:
 
 - Auth flow (login, callback, logout) with rate limiting
 - API endpoints for storing/retrieving user data via KV

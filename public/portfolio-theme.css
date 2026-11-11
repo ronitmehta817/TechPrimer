@@ -1,5 +1,5 @@
 /*
- * Tech Primer — portfolio theme
+ * ArchDock — portfolio theme
  * Colour, gradient, and material layer only. Every size, gap, margin, padding,
  * border width, and position still comes from styles.css, so the layout is
  * identical to the original app.
@@ -316,6 +316,7 @@ body::before {
 .logo {
     background: var(--tp-chip);
     border-color: var(--tp-ring);
+    padding: 6px 16px;
 }
 
 .logo:hover {
@@ -324,16 +325,51 @@ body::before {
 }
 
 .logo-icon {
-    background: var(--accent-gradient);
-    background-size: 100% 100%;
-    color: #ffffff;
+    background: #060a12;
+    border: 1px solid rgba(255, 255, 255, 0.16);
     animation: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .3);
-    box-shadow: 0 0 18px rgba(255, 153, 0, .35);
+    text-shadow: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .45), 0 0 16px rgba(255, 168, 0, .2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.logo-icon .logo-a {
+    color: #f5f6f6;
+    transition: color 0.3s ease;
+}
+
+.logo-icon .logo-d {
+    color: var(--tp-orange);
 }
 
 .logo:hover .logo-icon {
-    box-shadow: 0 0 24px rgba(255, 153, 0, .5);
+    transform: rotate(-6deg) scale(1.08);
+    border-color: rgba(255, 168, 0, 0.55);
+    box-shadow: 0 0 22px rgba(255, 168, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .25);
+}
+
+[data-theme="light"] .logo-icon {
+    background: #ffffff;
+    border-color: rgba(10, 14, 20, 0.16);
+    box-shadow: 0 2px 8px rgba(10, 14, 20, 0.08), 0 0 14px rgba(255, 150, 0, 0.16);
+}
+
+[data-theme="light"] .logo-icon .logo-a {
+    color: #0b0d10;
+}
+
+[data-theme="light"] .logo-icon .logo-d {
+    color: var(--tp-orange);
+}
+
+[data-theme="light"] .logo:hover .logo-icon {
+    border-color: rgba(194, 94, 0, 0.5);
+    box-shadow: 0 0 18px rgba(194, 94, 0, .3), inset 0 0 0 1px rgba(10, 14, 20, .08);
 }
 
 .logo-text {
@@ -341,6 +377,14 @@ body::before {
 }
 
 .logo-text span {
+    color: var(--tp-orange);
+}
+
+[data-theme="light"] .logo-text {
+    color: #0b0d10;
+}
+
+[data-theme="light"] .logo-text span {
     color: var(--tp-orange);
 }
 
@@ -822,6 +866,35 @@ body::before {
 }
 
 /* ===== Home ===== */
+.welcome-icon {
+    background: #060a12;
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .6), 0 0 28px rgba(255, 168, 0, .28);
+}
+
+.welcome-icon .logo-a {
+    color: #f5f6f6;
+    transition: color 0.3s ease;
+}
+
+.welcome-icon .logo-d {
+    color: var(--tp-orange);
+}
+
+[data-theme="light"] .welcome-icon {
+    background: #ffffff;
+    border-color: rgba(10, 14, 20, 0.16);
+    box-shadow: 0 12px 32px rgba(10, 14, 20, 0.12), 0 0 24px rgba(255, 150, 0, 0.2);
+}
+
+[data-theme="light"] .welcome-icon .logo-a {
+    color: #0b0d10;
+}
+
+[data-theme="light"] .welcome-icon .logo-d {
+    color: var(--tp-orange);
+}
+
 .welcome h1 {
     background: none;
     -webkit-text-fill-color: currentColor;

@@ -1,5 +1,5 @@
 /*
- * TechPrimer diagram icon set (original artwork, drawn for this lab).
+ * ArchDock diagram icon set (original artwork, drawn for this lab).
  *
  * 24x24 grid, 1.75 stroke, round caps and joins, no fill. Every icon is plain SVG
  * markup, so it can be inlined, turned into a data URI for a Mermaid label,

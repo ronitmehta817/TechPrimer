@@ -1,4 +1,4 @@
-# Cloudflare Worker config for tech-primer.
+# Cloudflare Worker config for archdock.
 #
 # BEFORE FIRST DEPLOY:
 #   1. Run `npm run kv:create` and paste the returned `id` into the
@@ -15,7 +15,7 @@
 # Static files in this directory are served via the [assets] binding
 # below; .assetsignore controls which files DON'T get uploaded.
 
-name = "tech-primer"
+name = "archdock"
 main = "src/index.js"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
