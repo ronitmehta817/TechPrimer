@@ -168,10 +168,10 @@ assert(
   "The superseded offline ZIP Download button is still present"
 );
 [
-  "vendor.js?v=20260825-mermaid-full",
-  "styles.css?v=20260825-mermaid-full",
+  "vendor.js?v=20261111-living",
+  "styles.css?v=20261110-search-blur",
   "mermaid-detect.js?v=20260825-mermaid-full",
-  "app.js?v=20261102-dark-diagrams"
+  "app.js?v=20261111-living"
 ].forEach(asset => {
   assert(index.includes(asset), `Missing PDF export cache version: ${asset}`);
 });
