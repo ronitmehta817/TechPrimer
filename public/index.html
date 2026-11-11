@@ -68,16 +68,16 @@
      blocking body parsing until vendors finish. Edit vendor.js to add or
      update any HTTPS dependency — index.html should never need to grow new
      https:// URLs. -->
-    <script src="vendor.js?v=20260825-mermaid-full"></script>
+    <script src="vendor.js?v=20261111-living"></script>
 
-    <link rel="stylesheet" href="styles.css?v=20260825-mermaid-full">
-    <link rel="stylesheet" href="portfolio-theme.css?v=20261104-liquid-light">
+    <link rel="stylesheet" href="styles.css?v=20261110-search-blur">
+    <link rel="stylesheet" href="portfolio-theme.css?v=20261110-glossy">
 </head>
 
 <body class="home-page">
     <!--
     THESIS: A software-engineering field guide wearing the designer portfolio's own animated gradient, with the original TechPrimer layout left untouched.
-    OWN-WORLD: The portfolio's WebGL sky (navy hero, teal/plum/gold/orange mesh, amber/teal contact) under film grain; black glass with white hairlines; flat orange and aqua accents.
+    OWN-WORLD: The portfolio's WebGL sky (navy hero, teal/plum/gold/orange mesh, amber/teal contact); glossy black glass with white hairlines; flat orange and aqua accents.
     STORY: Choose a colour-coded discipline, then read on black glass while the sky moves through the portfolio's palettes with reading progress.
     FIRST VIEWPORT: The original centred welcome on the navy hero sky: white title with an orange italic "Primer", statistics, then the tinted domain cards.
     FORM: Colour-and-material reskin of the supplied designer-portfolio reference; geometry stays in styles.css; seed key portfolio-reference.
@@ -269,17 +269,19 @@
          `CONTENT_FULL` rename that used to live as an inline bridge here is
          now done at the top of app.js's IIFE — inline scripts can't be
          deferred, and we need this rename to happen after content.js. -->
-    <script defer src="nebula-bg.js?v=20261031-shader"></script>
+    <script defer src="nebula-bg.js?v=20261110-glossy"></script>
     <script defer src="content/diagrams.js?v=20260825-mermaid-full"></script>
     <script defer src="content/design-manifest.js?v=20260825-mermaid-full"></script>
     <script defer src="question-sections.js?v=20260825-mermaid-full"></script>
-    <script defer src="content.js?v=20260825-mermaid-full"></script>
-    <script defer src="mindmaps.js?v=20260825-mermaid-full"></script>
+    <script defer src="content.js?v=20261110-mermaid-fix"></script>
+    <script defer src="mindmaps.js?v=20261110-mermaid-fix"></script>
     <script defer src="mindmap.js?v=20260825-mermaid-full"></script>
     <script defer src="mermaid-detect.js?v=20260825-mermaid-full"></script>
     <script type="module" src="three-bg.js?v=20260825-mermaid-full"></script>
     <script type="module" src="three-welcome.js?v=20260825-mermaid-full"></script>
-    <script defer src="app.js?v=20261102-dark-diagrams"></script>
+    <script defer src="living-icons.js?v=20261111-living"></script>
+    <script defer src="living.js?v=20261111-living"></script>
+    <script defer src="app.js?v=20261111-living"></script>
 </body>
 
 </html>
