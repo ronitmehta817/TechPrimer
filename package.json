@@ -1,22 +1,16 @@
 {
-  "name": "tech-primer",
-  "private": true,
-  "type": "module",
+  "name": "mission",
+  "version": "1.0.0",
+  "description": "A progressive plan for understanding Apache Kafka, built to follow naturally from core messaging concepts (queues, topics, pub/sub, competing consumers).",
+  "main": "index.js",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "kv:create": "wrangler kv namespace create USER_STORE",
-    "kv:create:preview": "wrangler kv namespace create USER_STORE --preview",
-    "tail": "wrangler tail",
-    "build:design": "node scripts/build-design-content.mjs",
-    "build:mindmaps": "node scripts/build-mindmaps.mjs",
-    "build:sitemap": "node scripts/build-sitemap.mjs",
-    "build": "npm run build:design && npm run build:mindmaps && npm run build:sitemap",
-    "validate:design": "node scripts/build-design-content.mjs --check && node scripts/build-sitemap.mjs --check",
-    "validate:diagrams": "node scripts/validate-diagram-coverage.mjs",
-    "test": "node --check public/vendor.js && node --check public/mermaid-detect.js && node --check public/app.js && node --check public/content.js && node --check public/content/design.js && node --check public/content/design-manifest.js && node --check public/content/diagrams.js && npm run validate:design && npm run validate:diagrams && node scripts/check-domain-pdf.mjs"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {
-    "wrangler": "^4.87.0"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "node-llama-cpp": "^3.17.1"
   }
 }

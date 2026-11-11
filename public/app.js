@@ -1511,7 +1511,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   ];
 
   function mermaidConfig() {
-    var config = { startOnLoad: false, theme: 'default', securityLevel: 'loose', flowchart: { curve: 'basis' } };
+    var config = { startOnLoad: false, theme: 'default', securityLevel: 'loose', suppressErrorRendering: true, flowchart: { curve: 'basis' } };
     if (document.documentElement.getAttribute('data-theme') === 'dark') {
       config.theme = 'base';
       config.themeVariables = MERMAID_DARK_THEME;
@@ -1769,25 +1769,44 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
   function renderMermaidInto(container, code, originalSrc) {
     var uid = 'mmd-' + (++mermaidIdCounter);
     var cleanCode = sanitizeMermaidSource(code);
-    if (document.documentElement.getAttribute('data-theme') === 'dark') cleanCode = darkenMermaidStyles(cleanCode);
+    // The living renderer picks its own violet/pink tints from the author's colours,
+    // so it gets the text before the dark-mode colour rewrite below.
+    var livingCode = cleanCode;
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) cleanCode = darkenMermaidStyles(cleanCode);
     function handleFailure(reason) {
       try { console.warn('[MQ-ERR] ' + uid + ': ' + reason + '\n--- code ---\n' + cleanCode); } catch (e) { }
       if (originalSrc && renderMermaidInkFallback(container, originalSrc)) return;
       renderMermaidErrorCard(container, cleanCode, reason);
     }
-    try {
-      mermaid.render(uid, cleanCode).then(function (result) {
-        if (isMermaidErrorSvg(result && result.svg)) {
-          handleFailure('Mermaid v11 syntax error.');
-          return;
-        }
-        container.innerHTML = result.svg;
-      }).catch(function (err) {
-        handleFailure((err && (err.message || err.str)) || 'Mermaid threw an error.');
-      });
-    } catch (e) {
-      handleFailure((e && (e.message || e.toString())) || 'Mermaid render crashed synchronously.');
+    function renderWithMermaid() {
+      try {
+        mermaid.render(uid, cleanCode).then(function (result) {
+          if (isMermaidErrorSvg(result && result.svg)) {
+            handleFailure('Mermaid v11 syntax error.');
+            return;
+          }
+          container.innerHTML = result.svg;
+        }).catch(function (err) {
+          handleFailure((err && (err.message || err.str)) || 'Mermaid threw an error.');
+        });
+      } catch (e) {
+        handleFailure((e && (e.message || e.toString())) || 'Mermaid render crashed synchronously.');
+      }
     }
+    // Living diagrams (icons, moving packets, replay) first; plain Mermaid if one cannot be drawn.
+    if (window.TPLiving && window.TPLiving.supports(livingCode)) {
+      window.TPLiving.render(livingCode, { theme: isDark ? 'dark' : 'light' }).then(function (living) {
+        if (!container.isConnected) { living.dispose(); return; }
+        container.replaceChildren(living.el);
+        container._livingDispose = living.dispose;
+      }).catch(function (err) {
+        try { console.warn('[Living] ' + uid + ' falling back to Mermaid: ' + (err && err.message)); } catch (e) { }
+        renderWithMermaid();
+      });
+      return;
+    }
+    renderWithMermaid();
   }
 
   function renderMermaidDiagrams() {
@@ -1853,6 +1872,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
       wrappers.forEach(function (wrapper) {
         var oldContainer = wrapper.querySelector('.mermaid-container');
         if (!oldContainer) return;
+        if (oldContainer._livingDispose) { try { oldContainer._livingDispose(); } catch (e) { } }
         var code = oldContainer.getAttribute('data-mermaid-src');
         var originalSrc = oldContainer.getAttribute('data-mermaid-ink-src');
 
@@ -3202,6 +3222,7 @@ if (typeof CONTENT !== 'undefined' && typeof window.CONTENT_FULL === 'undefined'
         startOnLoad: false,
         theme: theme,
         securityLevel: 'strict',
+        suppressErrorRendering: true,
         htmlLabels: false,
         fontFamily: 'Arial, Helvetica, sans-serif',
         flowchart: { curve: 'basis', htmlLabels: false },

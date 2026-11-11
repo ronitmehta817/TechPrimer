@@ -62,6 +62,7 @@
     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/properties.min.js',
     'https://cdn.jsdelivr.net/npm/mermaid@11.16.1/dist/mermaid.min.js',
     'https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js',
+    'https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js',
   ];
   var coreScriptsReady = Promise.all(vendorScripts.map(addScript));
 
